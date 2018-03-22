@@ -1,22 +1,4 @@
-#   Research on optical communication systems
-> Developed during graduate school at Stanford University.
-
-This project contains code for analyses and simulations of optical communications systems. 
-
-## Folder description
-
-- [components](https://github.com/jkperin/optical-comm/tree/master/components/): components and devices.
-- [docs](https://github.com/jkperin/optical-comm/tree/master/docs/): documentation (github.io).
-- [measurement](https://github.com/jkperin/optical-comm/tree/master/measurement/): measurement and characterization.
-- [processing](https://github.com/jkperin/optical-comm/tree/master/processing/): signal processing and impairment mitigation.
-- [projects](https://github.com/jkperin/optical-comm/tree/master/projects/): projects developed using the base code.
-- [propagate](https://github.com/jkperin/optical-comm/tree/master/propagate/): TBD.
-- [signal](https://github.com/jkperin/optical-comm/tree/master/propagate/): classes on modulation formats.
-- [tools](https://github.com/jkperin/optical-comm/tree/master/propagate/): TBD.
-- [utilities](https://github.com/jkperin/optical-comm/tree/master/propagate/): auxiliary functions.
-
-
-## Projects description
+# Projects description
 - [examples](https://github.com/jkperin/optical-comm/tree/master/projects/examples/) Some simple examples on how to run simulations of basic optical communication systems
 
 - [submarine_link_opt](https://github.com/jkperin/optical-comm/tree/master/projects/submarine_link_opt/) optimization of submarine optical links limited by energy constraints. Simulations of erbium-doped fiber amplifiers. EDFAs are modeled using the Standard Confined-Doping (SCD) model and capacity optimization is performed using the particle swarm optimization algorithm.

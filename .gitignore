@@ -218,3 +218,35 @@ TSWLatexianTemp*
 
 # expex forward references with \gathertags
 *-tags.tex
+
+# Matlab
+*.fig
+*.png
+*.bmp
+*.jpg
+*.eps
+*.emf
+*.mat
+*.dvi
+*.tikz
+*.auxlock
+*.asv
+*.zip
+*.pdf
+*.aux
+*.gz
+*.log
+*.o*
+*.blg
+*.xlsx
+*.md5
+*.dpth
+*.bbl
+*.blg
+*.xls
+*.mexw64
+*.err
+*.snm
+*.nav
+*.toc
+*.dat

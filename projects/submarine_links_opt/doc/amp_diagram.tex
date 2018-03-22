@@ -1,0 +1,60 @@
+\tikzset{
+	ncbar angle/.initial=90,
+	ncbar/.style={
+		to path=(\tikztostart)
+		-- ($(\tikztostart)!#1!\pgfkeysvalueof{/tikz/ncbar angle}:(\tikztotarget)$)
+		-- ($(\tikztotarget)!($(\tikztostart)!#1!\pgfkeysvalueof{/tikz/ncbar angle}:(\tikztotarget)$)!\pgfkeysvalueof{/tikz/ncbar angle}:(\tikztostart)$)
+		-- (\tikztotarget)
+	},
+	ncbar/.default=0.5cm,
+}
+
+\tikzset{square left brace/.style={ncbar=0.5cm}}
+\tikzset{square right brace/.style={ncbar=-0.5cm}}
+
+\tikzset{round left paren/.style={ncbar=0.5cm,out=120,in=-120}}
+\tikzset{round right paren/.style={ncbar=0.5cm,out=60,in=-60}}
+
+\begin{tikzpicture}[->, >=stealth, shorten >= 0pt, draw=black!50, node distance=2cm, font=\sffamily, triangle/.style = {regular polygon, regular polygon sides=3 },
+node rotated/.style = {rotate=0},
+border rotated/.style = {shape border rotate=0}]
+    \tikzstyle{node}=[circle,fill=black,minimum size=2pt,inner sep=0pt]
+    \tikzstyle{block}=[draw=black,rectangle,fill=none,minimum size=1cm, inner sep=0pt]
+    \tikzstyle{amp}=[draw=black,triangle,fill=none,minimum size=1.2cm, inner sep=0pt]
+    \tikzstyle{annot} = []
+
+	\node[node] (xc) at (0, 0) {};
+	\coordinate[right=1.2cm of xc] (vc) {};
+    \node[amp, rotate=-90] (AMP) at (vc)  {};
+    
+    \node[block, right of=AMP, align=center, text width=2cm, scale=0.8] (f) {\small Gain flattening}; 
+    \coordinate[right=2.5cm of f] (yc) {}; 
+    \node[node, minimum size=1.5pt] (fin) at ($(f.east)!0.2!(yc)$) {};
+    \node[node, minimum size=1.5pt] (fout) at ($(f.east)!0.5!(yc)$) {};
+	   
+	
+	\draw (xc) -- (AMP);
+	\draw (AMP) -- (f);
+	\draw (f) -- (fin);
+	\draw[-] (fin) -- (fout);
+	\draw (fout) -- (yc);
+	
+	\draw[black] ($(f.east)!0.3!(yc) + (0, 0.3cm)$) circle(0.3cm); 
+	\draw[black] ($(f.east)!0.35!(yc) + (0, 0.3cm)$) circle(0.3cm);
+	\draw[black] ($(f.east)!0.4!(yc) + (0, 0.3cm)$) circle(0.3cm);
+	
+	\node[below, scale=0.75] at ($(AMP) + (1mm, -5mm)$) {$G(\lambda), n(\lambda)$};
+	\node[below, scale=0.75] at ($(f.east)!0.35!(yc)$) {$e^{-\alpha_{\text{SMF}}(\lambda)l}$};
+	\node[below, scale=0.75] at (f.south) {$F(\lambda)$};
+	
+	\draw [-, black, thick] ($(xc)!0.5!(AMP)-(0,1cm)$) to [round left paren ] ($(xc)!0.5!(AMP)+(0,1cm)$);
+	\draw [-, black, thick] ($(f)!0.7!(yc)-(0,1cm)$) to [round right paren ] ($(f)!0.7!(yc)+(0,1cm)$);
+	\node[right] at ($(f)!0.7!(yc)-(0,1cm)$) {$\times N = \frac{L}{l}$};
+	
+	\node[above] at (xc) {$P_k$};
+	\ifdefined\NONLINEAR
+		\node[above] at ($(yc)+(1cm, 0)$) {$\approx P_k + n_{eq, k} + \mathrm{NL}_k$};
+	\else
+		\node[above] at ($(yc)+(0.5cm, 0)$) {$\approx P_k + n_{eq, k}$};
+	\fi
+\end{tikzpicture}

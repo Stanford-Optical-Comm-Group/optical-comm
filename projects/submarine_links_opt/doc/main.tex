@@ -1,0 +1,575 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[numbered]{bookmark}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{pifont}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{bm}
+\usepackage{dsfont}
+\usetikzlibrary{calc}
+\usetikzlibrary{pgfplots.fillbetween, backgrounds}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{pgfplots.groupplots}
+\usetikzlibrary{plotmarks}
+
+
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=newest} 
+
+\DeclareGraphicsExtensions{.eps,.pdf,.png,.tikz}
+\graphicspath{{figs/}}
+
+\title{Modeling Erbium Doped Fiber Amplifiers}
+
+\author{JKP}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{EDFA models}
+
+\subsection{Standard confined-doping model}
+
+The \textbf{standard confined-doping (SCD) model} makes the following assumptions:
+
+\begin{enumerate}
+	\item Pump, signal, and ASE propagate in the fiber fundamental mode 
+	\item The gain medium is homogeneously broadened 
+	\item ASE is generated in both polarizations
+	\item Er-doping is confined, but no assumption is made about the Er-doping profile. This assumption makes the overlap integrals between the doping and the optical mode power independent \cite{Giles1991, edfa_device}.
+\end{enumerate}
+
+For simulations, these additional assumptions are made
+\begin{enumerate}
+	\item The Er-doping profile $\rho(r)$ is approximately step-like:
+	\begin{equation}
+		\rho(r) \approx \begin{cases}
+		\rho_0,  & r \leq a_0\\
+		0, & \text{otherwise}
+		\end{cases},
+	\end{equation}
+	where $\rho_0$ is the ion density and $a_0$ is the doping radius.
+	\item The intensity distribution of the optical mode $\psi_\lambda(r)$ at wavelength $\lambda$ is approximated by a Gaussian envelope \cite[eq. (1.80)]{principles}
+	\begin{equation}
+		\psi_\lambda(r) \approx \exp\Big(-\frac{r^2}{\omega_\lambda^2}\Big), 
+	\end{equation}
+	where $\omega_\lambda$ is the mode size at wavelength $\lambda$ corresponding to the exact Bessel solution:
+	\begin{align} \label{eq:Bessel_approx}
+		\omega_\lambda = a\frac{VK_1(W)}{UK_0(W)}J_0(U)
+	\end{align}
+	where $a$ is the core radius, $V \approx \frac{2\pi}{\lambda}a\mathrm{NA}$ is the normalized frequency or $V$-parameter, NA is the numerical aperture, $K_i(\cdot)$ is the Bessel function of second kind and order $i$, and $J_0(U)$ is the Bessel function of first kind and order $0$. $U$ and $W$ are defined as
+	\begin{equation}
+		U = V\frac{1 + \sqrt{2}}{1 + \sqrt[4]{4 + V^4}} \qquad W = \sqrt{V^2 - U^2}
+	\end{equation}
+	by defining $\omega_\lambda$ as in \eqref{eq:Bessel_approx}, the Gaussian approximation for $\psi_\lambda(r)$ will have the same $1/e$ mode radius as the actual Bessel mode.
+	
+	The mode radius $\omega_\lambda$ may also be approximated by the analytical equation, which depends only on $V$:
+	\begin{equation}
+		\omega_\lambda \approx a(0.65 + 0.1619V^{-1.5} + 2.879V^{-6})
+	\end{equation}
+	this equation is accurate to within $1\%$ for $1.2\leq V\leq 2.4$ \cite[eq. (2.2.43)]{Agrawal}. However, the Bessel solution given in \eqref{eq:Bessel_approx} is preferred.
+	
+	The mode size is related to the effective area $A_{eff}(\lambda) = \pi\omega^2_\lambda$
+	
+	It is also common to use the normalized intensity distribution  $\bar{\psi}_\lambda(r)  = \psi_\lambda(r)/(\pi\omega_\lambda^2)$.
+	
+	\item The Er-doping distribution is confined in the core i.e., $a_0 << \omega_\lambda$
+	From these approximations it follows that the mode-doping region overlap integral is given by
+	\begin{align} 
+		\Gamma_\lambda^\prime &= 2\pi\int_0^{\infty} r\bar{\psi}_\lambda(r)\rho(r)/\rho_0dr \tag{\cite[eq. (1.220)]{edfa_device}} \\
+		&\approx 1 - \exp\Big(-\frac{a_0^2}{\omega_\lambda^2}\Big)
+	\end{align}
+	
+	The ratio $\epsilon_\lambda\equiv \frac{a_0}{\omega_\lambda}$ is called the \textbf{confinement factor}. A confinement factor of at least 25\% ($\epsilon_\lambda \leq 0.25$) is sufficient to make $\epsilon^2_\lambda/\Gamma_\lambda\approx 1$. 
+	
+	In \cite{Giles1991}, there is a similar definition, in which the parameter $\Gamma_\lambda$ is the overlap integral of the mode/doping-region. $\Gamma_\lambda$ only matches $\Gamma_\lambda^\prime$ in the case of step Er doping. 
+\end{enumerate}
+
+\subsection{Two-level laser system}
+Following the development of \cite{Giles1991} for an EDF pumped as a two-level system, the spectral properties of an EDFA are governed by the differential equation
+\begin{align} \label{eq:scd}
+	\frac{dP_k}{dz} = u_k(\alpha_k + g_k)\frac{\bar{n}_2}{\bar{n}_t}P_k(z) - u_k(\alpha_k + l_k)P_k(z) + u_kg_k\frac{\bar{n}_2}{\bar{n}_t}mh\nu_k\Delta\nu_k
+\end{align}
+\begin{equation}
+	\frac{\bar{n}_2}{\bar{n}_t} = \displaystyle\frac{\displaystyle\sum_k \displaystyle\frac{P_k(z)\alpha_k}{h\nu_k\xi_k}}{1 + \sum_k \displaystyle\frac{P_k(z)(\alpha_k + g_k)}{h\nu_k\xi_k}}
+\end{equation}
+
+The first term of \eqref{eq:scd} corresponds to the medium gain, the second term accounts for the attenuation, and the third term accounts for the ASE.
+
+It is common to separate the signal from the ASE in order to measure the noiseless gain and the ASE spectrum. Hence, if there are $N_{pump}$ pumps, $N_{signal}$ signals, there will be a total of $N_{pump} + N_{signal} + 2N_{signal}$ differential equations:
+\begin{align}\label{eq:odefun}
+	\frac{dP_k}{dz} &= u_k(\alpha_k + g_k)\frac{\bar{n}_2}{\bar{n}_t}P_k(z) - u_k(\alpha_k + l_k)P_k(z) \tag{Pump} \\
+	\frac{dP_k}{dz} &= u_k(\alpha_k + g_k)\frac{\bar{n}_2}{\bar{n}_t}P_k(z) - u_k(\alpha_k + l_k)P_k(z) \tag{Signal} \\
+	\frac{dP_k}{dz} &= (\alpha_k + g_k)\frac{\bar{n}_2}{\bar{n}_t}P_k(z) - (\alpha_k + l_k)P_k(z) + g_k\frac{\bar{n}_2}{\bar{n}_t}mh\nu_k\Delta\nu_k \tag{Forward ASE} \\
+	\frac{dP_k}{dz} &= -(\alpha_k + g_k)\frac{\bar{n}_2}{\bar{n}_t}P_k(z) + (\alpha_k + l_k)P_k(z) - g_k\frac{\bar{n}_2}{\bar{n}_t}mh\nu_k\Delta\nu_k \tag{Backward ASE} 
+\end{align}
+
+Parameters are defined in Table~\ref{tab:param}.
+
+\begin{table}[t]
+	\caption{Parameters definition. Index $k$ denotes the pump/signal/ASE wavelength}
+	\label{tab:param}
+	\centering
+	\begin{tabular}{r|l}
+		\hline
+		Symbol & Definition \\
+		\hline
+		$P_k(z)$ & power at position $z$ \\
+		$u_k$ & $u_k = \pm1$ for forward or backward propagation, respectively \\
+		$\alpha_k$ & absorption coefficient \\
+		$g_k$ & stimulated gain coefficient \\
+		$l_k$ & excess loss, accounts for additional fiber loss \\
+		$\xi_k$ & saturation parameter \\
+		$\nu_k$ & frequency \\
+		$m$ & number of supported modes ($m = 2$ for SMF)\\
+		$\bar{n}_t$ & average density of the metastable state \\
+		$\Delta\nu_k$ & resolution of ASE spectrum \\
+		$\tau$ & metastable lifetime (10 ms) \\
+		$h$ & Planck's constant \\
+		$\nu_k = c/\lambda_k$ & frequency corresponding to $k$th wavelength \\
+		\hline
+	\end{tabular}
+\end{table}
+
+The parameter $\xi_k$ is defined as $\xi = \pi a_0^2\bar{n}_t/\tau$ i.e., the ratio of the linear density (m$^{-1}$) of ions to the metastable lifetime. It can be determined from measurement of the fiber saturation power 
+\begin{equation}
+	\xi_k = P_{sat}(\lambda_k)\frac{\alpha_k+g_k}{h\nu_k}
+\end{equation}
+
+Saturation power at frequency $\nu$
+\begin{equation}
+P_{sat}(\lambda) = \frac{h\nu\pi\omega_{\lambda}^2}{(\sigma_a(\lambda) + \sigma_e(\lambda))\tau},
+\end{equation}
+where $\sigma_a(\lambda)$ and $\sigma_e(\lambda)$ denote the absorption and emission cross-sections, respectively. These cross-sections are related to the absorption and gain coefficients $\alpha_k$ and $g_k$:
+\begin{align}
+	\alpha_k &= \rho_0\Gamma_k^{\prime}\sigma_a(\lambda_k) \\
+	g_k &= \rho_0\Gamma_k^{\prime}\sigma_e(\lambda_k)
+\end{align}
+The gain and absorption coefficients are typically measure, but some authors characterize the EDF using the emission and absorption cross-sections. 
+
+The set of $N_{pump} + N_{signal} + 2N_{signal}$ nonlinear first-order differential equations form a boundary conditions problem. The boundary conditions are
+\begin{align}
+	P_k(z = 0) &= P_{pump}(\lambda_k) \tag{if pump propagates forward} \\
+	P_k(z = L) &= P_{pump}(\lambda_k) \tag{if pump propagates backward} \\
+	P_k(z = 0) &= P_{signal}(\lambda_k) \tag{Signal} \\
+	P_k(z = 0) &= 0 \tag{Forward ASE} \\
+	P_k(z = L) &= 0 \tag{Backward ASE}
+\end{align} 
+The ASE may have different boundary conditions if the amplifier has more than one stage.
+
+\subsection{Semi-analytical model}
+
+In some special cases the differential equation \eqref{eq:scd} can be solved analytically. By making the following assumptions
+\begin{enumerate}
+	\item $\Gamma_k$ is constant. The mode-doping region overlap integral does not depend on the wavelength. This ignores the mode radius dependence on the frequency
+	\item Amplifier is not saturated by ASE
+	\item excess loss is negligible
+\end{enumerate}
+
+\begin{equation} \label{eq:semi_analytical_gain}
+	Q^{out}_k = Q^{in}_k\exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL\Big)
+\end{equation}
+where
+\begin{equation}
+	Q^{in}_k = \frac{P_k}{h\nu_k}\qquad Q^{in} = \sum_k Q^{in}_k \qquad Q^{out} = \sum_k Q^{out}_k
+\end{equation}
+
+By summing \eqref{eq:semi_analytical_gain} over $k$:
+\begin{equation}
+Q^{out} = \sum_kQ^{in}_k\exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL\Big)
+\end{equation}
+This is an implicit equation for $Q^{out}$, which can be solved numerically. 
+
+\subsection{Analytical model}
+
+Asssuming that the \underline{amplifier is inverted uniformly}, the excess noise at the signal wavelengths does not depend on the propagation direction or on the pump power. The \textbf{excess noise} can be computed analytically and it only depends on the fiber gain and absorption coefficients at the pump and signals wavelength:
+\begin{equation}
+	n_{sp} = \frac{1}{1 - \displaystyle\frac{g_p\alpha_s}{g_s\alpha_p}}
+\end{equation}
+
+The ASE PSD is given by
+\begin{equation}
+	P_{ASE} = 2n_{sp}(G_k-1)h\nu_k
+\end{equation}
+
+This tends to be a good approximation only at high levels of pump power.
+
+\section{Optimization process}
+
+The amplifier parameters are divided into two categories: amplifier configuration and amplifier attributes. The parameters that belong to the amplifier configuration are assumed fixed, since they form a set of finite options. The amplifier attributes are optimized.
+
+\noindent\textbf{Amplifier configuration}
+\begin{itemize}
+	\item Fiber doping
+	\item Pumping scheme, pump propagation direction, pump wavelength
+	\item Amplification stages
+	\item Gain flattening device
+\end{itemize}
+
+\noindent\textbf{Amplifier attributes}
+\begin{itemize}
+	\item Pump power
+	\item EDF length
+	\item Input signal spectrum
+\end{itemize}
+
+The function amplifier can be defined as follows
+\begin{equation}
+	A(P_p(\lambda), L, P_s(\lambda); C) \to G(\lambda), n(\lambda)
+\end{equation}
+where $P_p(\lambda)$ is the pump power at wavelength $\lambda$,  $P_s(\lambda)$ is the signal power, $L$ is the EDF length, and $C$ determines the amplifier configuration. The function returns the gain $G(\lambda)$ and the ASE PSD $n(\lambda)$.
+
+\begin{figure}
+	\resizebox{\textwidth}{!}{\input{amp_diagram.tex}}
+	\caption{Amplifier chain block diagram}
+\end{figure}
+
+After a chain of $N = L/l$ amplifiers, we have the following equivalent gain and noise PSD
+\begin{align}
+	g_{eq}(\lambda) &= (G(\lambda)f(\lambda)e^{-\alpha_{\text{SMF}}(\lambda)l})^N \\
+	n_{eq}(\lambda) &= n(\lambda)f(\lambda)e^{-\alpha_{\text{SMF}}(\lambda)l}\Big(G(\lambda)f(\lambda)e^{-\alpha_{\text{SMF}}(\lambda)l})^{N-1}+\ldots+1\Big)
+\end{align}
+where $0\leq f(\lambda_k) \leq 1$ is the gain-flattening filter shape.
+
+By defining $r(\lambda) = G(\lambda)F(\lambda)e^{-\alpha_{\text{SMF}}(\lambda)l}$, we can write it more compactly:
+\begin{align}
+G_{eq}(\lambda) &= r^N(\lambda) \\
+n_{eq}(\lambda) &= n(\lambda)f(\lambda)e^{-\alpha_{\text{SMF}}(\lambda)l}\Big(\frac{1-r^{N}(\lambda)}{1-r(\lambda)}\Big), \quad r(\lambda)\neq 1
+\end{align}
+
+Assuming ideal gain flattening,
+\begin{equation}
+	F(\lambda) = \frac{1}{G(\lambda)e^{-\alpha_{\text{SMF}}(\lambda)l}} \implies r(\lambda) = 1.
+\end{equation}
+
+This results in 
+\begin{align}
+	G_{eq}(\lambda) &= 1 \\
+	n_{eq}(\lambda) &= n(\lambda)f(\lambda)e^{-\alpha_{\text{SMF}}(\lambda)l}N = \frac{n(\lambda)}{G(\lambda)}N
+\end{align}
+
+Considering $K$ wavelengths $\lambda_1, \ldots, \lambda_{K}$ spaced by $\Delta\lambda\Longleftrightarrow\Delta f$, the capacity of a dual-polarization system in the linear regime would be
+\begin{align}
+	C &= \sum_{k = 1}^{K} 2\Delta f\log_2\Big(1 + SNR(\lambda_k)\Big)\\
+	&= \sum_{k = 1}^{K} 2\Delta f\log_2\Bigg(1 + \frac{P_kG(\lambda_k)}{Nn(\lambda_k)}\Bigg)\label{eq:capacity}
+\end{align}
+where $P_k$ is the power launched on the $k$th wavelength. 
+
+Ideal gain flattening can only compensate for channels where $G(\lambda_k) \geq e^{-\alpha_{SMF}(\lambda_k)l}$. Hence, only the channels satisfying $G(\lambda_k) \geq e^{-\alpha_{SMF}(\lambda_k)l}$ should have non-zero power:
+
+\begin{equation}
+P_k \neq 0 \quad\text{only if}\quad G(\lambda_k) \geq e^{\alpha_{SMF}(\lambda_k)l}
+\end{equation}
+
+This way the gain flattening filter can be chosen such that
+
+From this we can simplify \eqref{eq:capacity}:
+
+Although \eqref{eq:capacity} is a simple equation, the gain shape $G(\lambda_k)$ and the noise PSD $n(\lambda_k)$ depend on the signal power $P(\lambda_k)$.
+
+Assuming that the noise PSD is such that:
+\begin{equation}
+	n(\lambda_k) = 2n_{sp}(\lambda_k)(G(\lambda_k) - 1)h\nu_k,
+\end{equation}
+where $n_{sp}(\lambda_k)$ is the excess-noise factor given by
+\begin{equation} \label{eq:excess_noise}
+	n_{sp}(\lambda_k) = \frac{1}{1 - \frac{g_p\alpha_k}{\alpha_pg_k}},
+\end{equation}
+where $\alpha_p$ and $g_p$ denote the absorption and gain coefficients at the pump wavelength, while  $\alpha_k$ and $g_k$ denote the absorption and gain coefficients at the signal wavelengths. 
+
+Although \eqref{eq:excess_noise} is obtained from the analytical assumption that the fiber is uniformly inverted, it is a relatively good approximation for the actual ASE PSD provided that the gain $G(\lambda_k)$ is obtained from the semi-analytical \eqref{eq:semi_analytical_gain} or numerical \eqref{eq:scd} models. 
+
+The amplifier noise figure is defined as
+\begin{equation} \label{eq:NF}
+	\mathrm{NF}(\lambda_k) = 2n_{sp}(\lambda_k)\frac{G(\lambda_k)-1}{G(\lambda_k)}
+\end{equation}
+
+For the ON channels the gain is relatively high, since $G(\lambda_k) \geq e^{\alpha_{SMF}(\lambda_k)l}$. Thus, we can use the approximation $\frac{G(\lambda_k)-1}{G(\lambda_k)} \approx \frac{A-1}{A} \equiv a$, where $A = e^{\alpha_{\text{SMF}}l}$ is the span attenuation. Hence, if $A = 10$, $a = 0.9$. 
+
+\begin{equation} \label{eq:NF}
+\mathrm{NF}(\lambda_k) \approx 2n_{sp}(\lambda_k)a
+\end{equation}
+
+\begin{align} \nonumber
+C &= \sum_{k = 1}^{K} 2\Delta f\log_2\Bigg(1 + \frac{P_kG(\lambda_k)}{2Nn_{sp}(\lambda_k)(G(\lambda_k) - 1)h\nu_k\Delta f}\Bigg) \\
+&= \sum_{k = 1}^{K} 2\Delta f\log_2\Bigg(1 + \frac{P_k}{2aNn_{sp}(\lambda_k)h\nu_k\Delta f}\Bigg) \\
+\end{align}
+
+
+The summation is performed over the channels that have gain higher than the span attenuation:
+
+\begin{equation}
+\mathrm{SE} =2\sum_{k} \mathds{1}\{G(\lambda_k) \geq e^{\alpha_{\text{SMF}}(\lambda_k)l}\}\log_2\bigg(1 + \frac{P_k}{2aNn_{sp}(\lambda_k)h\nu_k\Delta f}\bigg) 
+\end{equation}
+
+For simulations, the indicator is approximated by a differentiable function
+
+\begin{equation}
+	\bm{1}\{x \geq 0\} \approx 0.5(\tanh(Dx) + 1)
+\end{equation}
+where $D$ controls the smoothness.
+
+\section{Gaussian noise model}
+
+The nonlinear noise power spectrum $G_{NL}(f)$ is given by \cite{Poggiolini2012}
+\begin{equation}
+	G_{NL}(f) = \frac{16}{27}\gamma^2\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}G(f_1)G(f_2)G(f_1+f_2-f)\rho(f_1, f_2, f)\chi(f_1, f_2, f)\partial f_1\partial f2,
+\end{equation}
+
+\begin{align}
+	\rho(f_1, f_2, f) &= \Bigg|\frac{1 - \exp\Big(-2\alpha L_s + j4\pi^2\beta_2L_2(f_1-f)(f_2-f)\Big)}{2\alpha - j4\pi^2\beta_2(f_1-f)(f_2-f)}\Bigg|^2 \\
+	\chi(f_1, f_2, f) &= \frac{\sin^2(N_s\theta)}{\sin^2(\theta)}, \quad \theta = 2\pi^2(f_1-f)(f_2-f)\beta_2L_s
+\end{align}
+
+\noindent where $\alpha$ is the span attenuation, $\gamma$ is the nonlinear coefficient, $\beta_2$ is the dispersion propagation constant, $L_s$ is the span length, and $N_s$ is the number of spans.
+
+Using the discretization presented in \cite{Roberts2016}, the nonlinear power in each of the $N$ channels can be expressed as a function of the signal power at channel $n$, $P_n$:
+
+\begin{equation}
+	\mathrm{NL}_n = \sum_{n_1 = 1}^{N}\sum_{n_1 = 1}^N\sum_{l=-1}^{1}P_{n_1}P_{n_2}P_{i+j-n+l}D_l(n_1, n_2, n), \quad n = 1, \ldots, N
+\end{equation}
+for $1 \leq i+j-n+l \leq N$. In this equation, $D_l(i, j, n)$ is an integral that defines a set of system-specific coefficients that determine the strength of the four-wave mixing component that falls on channel $n$, generated by channels $n_1$, $n_2$, and $n_1 + n_2 - n+l$ \cite{Roberts2016}.
+
+The coefficient $D_l(i, j, n)$ is defined as
+\begin{align} \label{eq:Dcoeff-original}\nonumber 
+D(n_1, n_2, n) &= \gamma^2\frac{16}{27}\int_{-\Delta f/2}^{\Delta f/2}\int_{-\Delta f/2}^{\Delta f/2}\int_{-\Delta f/2}^{\Delta f/2} \\ \nonumber
+&\cdot\rho(x + n_1\Delta f, y + n_2\Delta f, z + n\Delta f)\chi(x + n_1\Delta f, y + n_2\Delta f, z + n\Delta f) \\
+&\cdot g(x)g(y)g(z)g(x+y-z+l\Delta f)\partial x\partial y\partial z,
+\end{align}
+where $R_s$ is the symbol rate, $\Delta f$ is the channel spacing, and $g(f)$ is the spectral shape of each channel, which has been normalized so that $\int g(f) = 1$. Assuming that the spectral shape is rectangular with width $\Delta f = R_s$, we would have
+\begin{equation}
+	g(f) = \begin{cases}
+	\frac{1}{\Delta f}, & |f| \leq \frac{\Delta f}{2} \\
+	0, & \text{otherwise}
+	\end{cases}
+\end{equation} 
+
+Following this assumption, \eqref{eq:Dcoeff-original} reduces to 
+
+\begin{align} \label{eq:Dcoeff-original}\nonumber 
+D(n_1, n_2, n) &= \gamma^2\frac{16}{27}\frac{1}{\Delta f^3}\int_{-\Delta f/2}^{\Delta f/2}\int_{-\Delta f/2}^{\Delta f/2}\int_{-\Delta f/2}^{\Delta f/2} \\ \nonumber
+&\cdot\rho(x + n_1\Delta f, y + n_2\Delta f, z + n\Delta f)\chi(x + n_1\Delta f, y + n_2\Delta f, z + n\Delta f) \\
+&\cdot g(x+y-z+l\Delta f)\partial x\partial y\partial z,
+\end{align}
+
+To avoid the nonlinearity in the integrand introduced by $g(x+y-z+l\Delta f)$, we could modify the integration boundaries, but numerical methods don't seem to have a problem integrating with the nonlinearity in the integrand.
+
+The oscillatory behavior of $\chi(f_1, f_2, f)$ makes the integration above difficult. To circumvent this problem, we can use the $\epsilon$ power law for scaling the non-linear noise power $NL_n$ for 1 span to $N_s$ spans \cite{Poggiolini2012}:
+
+\begin{equation}
+	NL_n\Big|_{N_s} = NL_n\Big|_{N_s = 1}\cdot N_s^{1+\epsilon},
+\end{equation}
+where $\epsilon$ can be computed numerically, but it's usually $\epsilon \approx 0.05$ for a sufficiently large optical bandwidth. Note that for $N_s = 1$, $\chi(f_1, f_2, f) = 1$, which simplifies the numerical integration.
+ 
+The functions $\rho(f_1, f_2, f)$ and $\chi(f_1, f_2, f)$ in the integrand of $D(i, j, n)$ depend on the frequencies $f_1, f_2, f$ only as $(f_1-f)(f_2-f)$. As a result, we can represent $D(n_1, n_2, n)$ as a symmetric $2N-1\times 2N-1$ matrix, which reduces the number of total computed entries.
+\begin{equation}
+	D_{ij} = D(n_1, n_2, n), \quad i = n_1 - n, j = n_2 - n
+\end{equation}
+
+\section{Gradient calculation}
+
+When the particle swarm optimization algorithm ends, an interior-point local optimization algorithm starts. In Matlab that's realized by the function \texttt{fmincon}, which minimizes a multivariate constrained function. The objective does not necessarily need to be convex.
+
+For the local optimization, it is necessary to compute the gradient analytically otherwise the solutions will exhibit an oscillatory behavior due to gradient estimation errors.
+
+Including nonlinearity, the objective function is given by
+
+\begin{equation} \label{eq:grad:SE}
+	\mathrm{SE} = 2\sum_{k = 1}^N s(G_k - A)\log_2(1 +  \mathrm{SNR}_k),
+\end{equation}
+where $s(x) = 0.5(\mathrm{tanh(Dx)}-1)$ is a function that approximates a step function and $D$ determines the sharpness of the step function approximation, $G_k$ is the gain of the $k$-th channel in dB, $A_k$ is the span attenuation in the $k$-th channel in dB, and $SNR_k$ is the SNR at the $k$-th channel, which is given by
+\begin{equation}
+	\mathrm{SNR}_k = \frac{P_k}{P_{ASE, k} + \mathrm{NL}_k(P)}
+\end{equation}
+
+The ASE power $P_{ASE, k} = 2aNn_{sp}(\lambda_k)h\nu_k\Delta f$ does not depend on the signal power $P_k$, but the nonlinear noise power is a function of the power vector $\tilde{P}$ i.e., it depends on the launch power of all channels.
+
+Deriving SE with respect to $P_m$ yields
+
+\begin{equation} \label{eq:partial_SE}
+	\frac{\partial\mathrm{SE}}{\partial P_m} = \frac{2}{\log(2)}\sum_{k = 1}^N \bigg [
+	\frac{\partial \mathcal{G}_k}{\partial P_m} \log(1 + \mathrm{SNR}_k) s^{\prime}(\mathcal{G}_k - A) + \frac{\partial \mathrm{SNR}_k}{\partial P_m}\frac{ s(\mathcal{G}_k - A)}{1 + \mathrm{SNR}_k}
+	\bigg]
+\end{equation}
+
+The equation above depends on the gradient of the SNR and on the gradient of the gain. Note that the gain $\mathcal{G}$ is in dB in this expression, and therefore the gradient must be computed with respect to the gain in dB. These gradients will be calculated in the next subsections.
+
+\subsection{Gain Gradient}
+
+From the semi-analytical derivation the gain is given by the transcendental equation:
+
+\begin{align} 
+G_k &= \exp\Big(a_k(Q^{in} - Q^{out}) - b_k\Big) \\ \label{eq:partial_Gk}
+& \implies \frac{\partial G_k}{\partial P_m} = a_k\Big(\frac{\partial Q^{in}}{\partial P_m} - \frac{\partial Q^{out}}{\partial P_m}\Big)G_k
+\end{align}
+where
+\begin{equation}
+\frac{\partial Q^{in}}{\partial P_m} = \frac{1}{h\nu_m}
+\end{equation}
+and 
+\begin{align}
+Q^{out} &= \frac{P_p}{h\nu_p}G_p + \sum_{i}\frac{P_i}{h\nu_i}G_i \\ \label{eq:partial_Qout}
+& \implies \frac{\partial Q^{out}}{\partial P_m} = \frac{1}{h\nu_m}G_m + \frac{P_p}{h\nu_p}\frac{\partial G_p}{\partial P_m} + \sum_{i}  \frac{P_i}{h\nu_i}\frac{\partial G_i}{\partial P_m} 
+\end{align}
+Note that this gradient includes the pump terms given by the subindex $p$.
+
+
+Substituting \eqref{eq:partial_Gk} in \eqref{eq:partial_Qout} and solving for $\frac{\partial Q^{out}}{\partial P_m}$ yields
+\begin{align} \nonumber
+\frac{\partial Q^{out}}{\partial P_m} = \frac{1}{h\nu_m}G_m + \frac{P_p}{h\nu_p}a_p\Big(\frac{1}{h\nu_m} - &\frac{\partial Q^{out}}{\partial P_m}\Big)G_p + \sum_{i}  \frac{P_i}{h\nu_i}a_i\Big(\frac{1}{h\nu_m} - \frac{\partial Q^{out}}{\partial P_m}\Big)G_i \\ \nonumber
+\frac{\partial Q^{out}}{\partial P_m}\bigg(1 + \frac{P_p}{h\nu_p}a_pG_p  + \sum_{i}\frac{P_i}{h\nu_i}a_iG_i \bigg) &= \frac{1}{h\nu_m}\bigg(G_m + \frac{P_p}{h\nu_p}a_pG_p + \sum_{i}\frac{P_i}{h\nu_i}a_iG_i\bigg) \\
+\frac{\partial Q^{out}}{\partial P_m} &= \frac{1}{h\nu_m}\frac{G_m + \frac{P_p}{h\nu_p}a_pG_p + \sum_{i}\frac{P_i}{h\nu_i}a_iG_i}{1 + \frac{P_p}{h\nu_p}a_pG_p+\sum_{i}\frac{P_i}{h\nu_i}a_iG_i}
+\end{align}
+
+Now substituting back in \eqref{eq:partial_Gk}:
+
+\begin{align} \nonumber
+\frac{\partial G_k}{\partial P_m} &= \frac{a_k}{h\nu_m}\Bigg(1 - \frac{G_m + \frac{P_p}{h\nu_p}a_pG_p + \sum_{i}\frac{P_i}{h\nu_i}a_iG_i}{1 + \frac{P_p}{h\nu_p}a_pG_p+\sum_{i}\frac{P_i}{h\nu_i}a_iG_i}\Bigg)G_k \\ \nonumber
+& = \frac{a_i}{h\nu_m}\Bigg(\frac{1 - G_m}{1 + \frac{P_p}{h\nu_p}a_pG_p + \sum_i\frac{P_i}{h\nu_i}a_iG_i}\Bigg)G_k \\
+& = \frac{1 - G_m}{h\nu_m}\Bigg(\frac{a_kG_k}{1 + \frac{P_p}{h\nu_p}a_pG_p + \sum_i\frac{P_i}{h\nu_i}a_iG_i }\Bigg)
+\end{align}
+
+To obtain the gradient of the gain in dB we have
+\begin{equation}
+	\frac{\partial\mathcal{G}_k}{\partial P_m} = \frac{10}{\log(10)}\frac{1}{G_k}\frac{\partial G_k}{\partial P_m}
+\end{equation}
+
+\subsubsection{Gain derivative with respect to EDF length}
+
+It's also necessary to compute the gain gradient with respect to the EDF length.
+
+\begin{equation} \label{eq:partial_Gk_L}
+	\frac{\partial G_k}{\partial L} = -\Big(\alpha_k + a_k\frac{\partial Q^{out}}{\partial L}\Big)G_k,
+\end{equation}
+where
+\begin{align} \nonumber
+	\frac{\partial Q^{out}}{\partial L} &= \frac{P_p}{h\nu_p}\frac{\partial G_p}{\partial L} + \sum_{i}\frac{P_i}{h\nu_i}\frac{\partial G_i}{\partial L}  \\ \nonumber
+	&=-\frac{P_p}{h\nu_p}\Big(\alpha_p + a_p\frac{\partial Q^{out}}{\partial L}\Big)G_p - \sum_{i}\frac{P_i}{h\nu_i}\Big(\alpha_i + a_i\frac{\partial Q^{out}}{\partial L}\Big)G_i \\ \nonumber
+	&\frac{\partial Q^{out}}{\partial L}\bigg(1 + \frac{P_p}{h\nu_p}a_pG_p + \sum_{i}\frac{P_i}{h\nu_i}a_iG_i\bigg) = -\frac{P_p}{h\nu_p}\alpha_pG_p -  \sum_{k}\frac{P_i}{h\nu_i}\alpha_iG_i \\ 
+	&\frac{\partial Q^{out}}{\partial L} = -\frac{\frac{P_p}{h\nu_p}\alpha_pG_p +  \sum_{i}\frac{P_i}{h\nu_i}\alpha_iG_i }{1 + \frac{P_p}{h\nu_p}a_pG_p + \sum_{k}\frac{P_i}{h\nu_i}a_iG_i}
+\end{align}
+
+Substituting in \eqref{eq:partial_Gk_L} yields
+\begin{equation} 
+\frac{\partial G_k}{\partial L} = -\bigg(\frac{\alpha_kG_k}{1 + \frac{P_p}{h\nu_p}a_pG_p + \sum_{i}\frac{P_k}{h\nu_i}a_iG_i}\bigg),
+\end{equation}
+
+\subsection{SNR gradient}
+The SNR depends on the $m$th channel power through the power itself and through the nonlinear noise power. The derivative of the SNR in the $k$th channel with respect to the power in the $m$th channel is given by
+
+\begin{align}
+	\frac{\partial\mathrm{SNR}_k}{\partial P_m} &= \begin{cases}
+	-\frac{\partial \mathrm{NL}_k}{\partial P_m}\frac{P_k}{(P_{\text{ASE}, k} + \mathrm{NL}_k)^2}, & k \neq m \\
+	-\frac{\partial \mathrm{NL}_k}{\partial P_m}\frac{P_k}{(P_{\text{ASE}, k} + \mathrm{NL}_k)^2} + \frac{1}{P_{\text{ASE}, k} + \mathrm{NL}_k}, & k = m
+	\end{cases} \\
+	&= \begin{cases}
+	-\frac{\partial \mathrm{NL}_k}{\partial P_m}\frac{\mathrm{SNR}_k^2}{P_k}, & k \neq m \\
+	-\frac{\partial \mathrm{NL}_k}{\partial P_m}\frac{\mathrm{SNR}_k^2}{P_k} + \frac{\mathrm{SNR}_k}{P_k}, & k = m
+	\end{cases} \\
+	& = \mathds{1}\{k= m\}\frac{\mathrm{SNR}_m}{P_m} - \frac{\partial \mathrm{NL}_k}{\partial P_m}\frac{\mathrm{SNR}_k^2}{P_k}
+\end{align}
+
+Note that this equation is written in terms of $SNR_k$ for convenience. In practice, it's easier to write out this equation as a function of the total noise power in order to avoid divisions by the power $P_k$, which could go to zero during optimization. 
+
+For the nonlinear noise power, we have
+
+\begin{equation} \label{eq:nonlinear-noise-power}
+	\mathrm{NL}_n(\tilde{P}) = \sum_{n_1 = 1}^{N}\sum_{n_1 = 1}^N\sum_{l=-1}^{1}\tilde{P}_{n_1}\tilde{P}_{n_2}\tilde{P}_{i+j-n+l}D_l(n_1, n_2, n), \quad n = 1, \ldots, N,
+\end{equation}
+where $\tilde{P}$ is the launch power into the fiber at each channel, so that
+\begin{equation}
+	\tilde{P}_k = P_ke^{\alpha_{\text{SMF}, k}L},
+\end{equation}
+since the gain flattening filter ideally makes the channel gain equal to the fiber attenuation. Therefore, once we know $\frac{\partial NL_k}{\partial\tilde{P}_m}$, we can obtain $\frac{\partial NL_k}{\partial P_m}$ from
+\begin{equation}
+	\frac{\partial\mathrm{NL}_k}{\partial P_m} = e^{\alpha_{\text{SMF}, m}L}\frac{\partial\mathrm{NL}_k}{\partial\tilde{P}_m}
+\end{equation}
+
+\noindent (!! check) this may require $\alpha_{\text{SMF}, m}$ to be constant!
+
+$\frac{\partial NL_k}{\partial\tilde{P}_m}$ can be computed by inspection of \eqref{eq:nonlinear-noise-power}, where each term is differentiated independently. An equation for the gradient of $\mathrm{NL}_n(\tilde{P})$ with respect to logarithmic power is given in \cite[Appendix]{Roberts2016}. 
+
+\subsection{Spectral efficiency gradient}
+
+Returning to \eqref{eq:partial_SE}
+
+\begin{equation}
+\frac{\partial\mathrm{SE}}{\partial P_m} = \frac{2}{\log(2)}\sum_{k = 1}^N \bigg [
+\frac{\partial \mathcal{G}_k}{\partial P_m} \log(1 + \mathrm{SNR}_k) s^{\prime}(\mathcal{G}_k - A) + \frac{\partial \mathrm{SNR}_k}{\partial P_m}\frac{ s(\mathcal{G}_k - A)}{1 + \mathrm{SNR}_k}
+\bigg]
+\end{equation}
+ 
+we can now substitute
+
+\begin{align}
+	\frac{\partial\mathcal{G}_k}{\partial P_m} &= \frac{10}{\log(10)}\frac{1}{G_k}\frac{1 - G_m}{h\nu_m}\Bigg(\frac{a_kG_k}{1 + \frac{P_p}{h\nu_p}a_pG_p + \sum_i\frac{P_i}{h\nu_i}a_iG_i }\Bigg) \\
+	\frac{\partial\mathrm{SNR}_k}{\partial P_m} &= \mathds{1}\{k= m\}\frac{\mathrm{SNR}_m}{P_m} - \frac{\partial \mathrm{NL}_k}{\partial P_m}\frac{\mathrm{SNR}_k^2}{P_k}
+\end{align}
+
+Since the optimization is realized with power values in dBm ($\mathcal{P}$), it's necessary to change the differentiation variable:
+
+\begin{align} \nonumber
+\frac{\partial SE}{\partial P_m} &= \frac{\partial SE}{\partial \mathcal{P}_m}\frac{\partial\mathcal{P}_m}{\partial P_m} \\
+&\implies \frac{\partial SE}{\partial \mathcal{P}_m} =  \bigg(\frac{\partial\mathcal{P}_m}{\partial P_m}\bigg)^{-1}\frac{\partial SE}{\partial P_m} = \frac{P_m\log(10)}{10}\frac{\partial SE}{\partial P_m}
+\end{align}
+
+\subsection{Spectral efficiency gradient derivative with respect to EDF length}
+
+\begin{align} 
+\frac{\partial \mathrm{SE}}{\partial L} &= 2\sum_k\frac{\partial \mathcal{G}_k}{\partial L}s^{\prime}(\mathcal{G}_k-A)\log_2(1 + \mathrm{SNR}_k),
+\end{align}
+where the gradient of the gain in dB with respect to the EDF length is given by
+
+\begin{align}
+\frac{\partial \mathcal{G}_k}{\partial L} &= -\frac{10}{\log(10)}\bigg(\frac{\alpha_kG_k}{1 + \frac{P_p}{h\nu_p}a_pG_p + \sum_{i}\frac{P_k}{h\nu_i}a_iG_i}\bigg)
+\end{align}
+
+
+%The final expression for the gradient is given by
+%
+%\begin{align}
+%\frac{\partial SE}{\partial\mathcal{P}_m} &\approx \frac{2}{\log(2)}\frac{P_m\log(10)}{10}\sum_{k = 1}^N \bigg[\mathds{1}\{k= m\}\frac{SNR_m}{P_m} - e^{\alpha_{\text{SMF}, m}L}\frac{\partial \mathrm{NL}_k}{\partial P_m}\frac{SNR_k^2}{P_k}\bigg]\bigg [
+%\frac{s(G_k - A)}{1 + SNR_k}
+%\bigg] 	
+%\end{align}
+
+\newpage
+\section{Notes on amplifier physics}
+
+\begin{itemize}
+	\item Er-doped fibers can be pumped either as a two-level or a three-level  laser system
+	\item Three-level system: level 1 is the ground level, level 2 is the metastable level characterized by the long lifetime $\tau$. Level 3 is the pump level.
+	\item The spontaneous decay from level 3 to level 2 is assumed to be predominantly nonradiative.
+	\item The spontaneous decay from level 2 to level 1 is assumed to be predominantly radiative
+	\item Assuming that the nonradiative decay $A_{32}$ dominates over the pumping rates $R_{13}$ and $R_{31}$, the pump level population $N_3$ is negligible due to the predominant nonradiative decay toward the metastable level 2 ($A_{32}$).
+	\item The charge distribution in the host glass causes a permanent electric field called ligand field. A ligand field induces a \textbf{Stark effect}, which results in the splitting of the energy levels.
+	\item Given the multiplicity of the levels split by the Stark effect, it may seem that the three-level model is an oversimplification. However, the effect of \textbf{intramanifold thermalization} makes this model accurate. Thermalization maintains a constant population distribution within the manifolds (Boltzmann's distribution), which eventually makes it possible to consider each of them as single
+	energy level.
+	\item Because of the assumption of thermal equilibrium distributions of populations within each Stark manifold, the Stark-split laser system is equivalent to a three-level system.
+	\item There's significant population difference between the Stark-split sublevels. This could lead to relaxation between the sublevels (Prof. Kahn's example of CW EDF laser)
+	\item The fact that the main energy levels are split with uneven internal populations distributions also make it possible to pump Er$^{3+}$ glass directly in level 2 and to achieve overall population inversion between levels 1 and 2. This quasi-two-level pump would not be possible if the levels were not split by the Stark effect.
+	\item Assumption that all ions in the laser medium are characterized by identical cross-sections. This is equivalent to assuming \textbf{homogeneous broadening} i.e., all ions occupy identical atomic sites in the glass host. This implies that the Stark effect induces identical energy level splitting. However, this is not a realistic assumption since the location of the ions is random. To model \textbf{inhomogeneous broadening} the cross-sections must be averaged at a macroscopic scale. 
+	\item Two-level pumping means that the pump is on the signal band (typically 1480 nm).
+	\item The differential equation for the ASE gives the spectrum over a narrow band of width $\delta\nu$ centered around $\lambda_k$. However, ASE is generated over a continuum of wavelengths spanning the entire glass gain spectrum. Therefore, to obtain the ASE over a bandwidth $\Delta\nu$, one must solve the differential equations $k = \Delta\nu/\delta\nu$. Accounting for the co- and counter-propagating ASE, the equations must be solved $2k$ times.
+	\item The set of differential equations is coupled and nonlinear, as each band is subject to saturation from all other spectral components due to the homogeneous characteristic of the gain medium. 
+	\item It can be shown that the minimum noise of the amplifier is linked to Heisenberg's uncertainty principle (\textit{Principles}, section 2.1) 
+	\item Background loss coefficients for both signal and power are negligible. This is due to the fact that the Er-doped fiber is typically short.
+	\item In EDFAs, the optical \textbf{noise figure} is higher when the pump is counter-propagating than when the pump is co-propagating. (\textit{Principles}, page 109).
+	\item Backward pumping yields the highest power conversion efficiency (Fig. 5.16, \textit{Principles})
+\end{itemize}
+
+
+\bibliographystyle{plain}
+\bibliography{bib}
+
+\end{document}

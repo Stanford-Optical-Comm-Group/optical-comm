@@ -1,0 +1,410 @@
+\documentclass[10pt]{beamer}
+\usefonttheme{professionalfonts}
+%\usetheme{CambridgeUS}
+%
+% Choose how your presentation looks.
+%
+% For more themes, color themes and font themes, see:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+%
+\mode<presentation>
+{
+  \usetheme{default}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usecolortheme{beaver} % or try albatross, beaver, crane, ...
+  \usefonttheme{default}  % or try serif, structurebold, ...
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+} 
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{array}  % for table column M
+\usepackage{makecell} % to break line within a cell
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{amsfonts}
+\usepackage{xcolor}
+\usepackage{ifthen}
+\usepackage{dsfont}
+%\usepackage{mathtools}
+\usepackage[makeroom]{cancel}
+\usetikzlibrary{spy}
+%\captionsetup{compatibility=false}
+%\usepackage{dsfont}
+\usepackage[absolute,overlay]{textpos}
+\usetikzlibrary{calc, angles,quotes}
+\usetikzlibrary{pgfplots.fillbetween, backgrounds}
+\usetikzlibrary{positioning}
+\usetikzlibrary{arrows}
+\usetikzlibrary{pgfplots.groupplots}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{plotmarks}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{decorations.markings}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=newest} 
+%\pgfplotsset{plot coordinates/math parser=false}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\definecolor{blue2}{RGB}{51, 105, 232}  
+\definecolor{red2}{RGB}{213, 15, 37}  
+\definecolor{green2}{RGB}{0, 153, 37}  
+\definecolor{green3}{rgb}{0.1922, 0.6392, 0.3294}% 
+\definecolor{yellow2}{RGB}{238, 178, 17} 
+\definecolor{gray2}{RGB}{102, 102, 102}
+\definecolor{orange2}{RGB}{230, 85, 13}
+
+% Qualitative pallete set1 from www.ColorBrewer.org
+\definecolor{Qred}{RGB}{228,26,28}
+\definecolor{Qblue}{RGB}{55,126,184}
+\definecolor{Qgreen}{RGB}{77,175,74}
+\definecolor{Qpurple}{RGB}{152,78,163}
+\definecolor{Qorange}{RGB}{255,127,0}
+\definecolor{Qyellow}{RGB}{255,255,51}
+\definecolor{Qbrown}{RGB}{166,86,40}
+\definecolor{Qpink}{RGB}{247,129,191}
+\definecolor{Qgray}{RGB}{153,153,153}
+
+%
+%\def\EXTERNALIZE{1}
+\input{header.tex} % some definitions
+
+%% 
+\title{Optical system optimization}
+\author{Jose Krause Perin}
+\institute{Stanford University}
+\date{August 17, 2017}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+\begin{frame}{EDFA Physics}
+
+\begin{equation} \tag{gain}
+G_k = L\bigg((\alpha_k + g_k)\frac{\alpha_p}{\alpha_p + g_p} - \alpha_k\bigg)
+\end{equation}
+
+\begin{equation} \tag{ASE PSD}
+P_{ASE} = 2n_{sp}(\lambda_k)(G_k-1)h\nu_k
+\end{equation}
+
+\begin{equation} \tag{excess noise}
+n_{sp}(\lambda_k) = \frac{1}{1 - \displaystyle\frac{g_p\alpha_k}{g_k\alpha_p}}
+\end{equation}
+
+\begin{equation} \tag{noise figure}
+\mathrm{NF}(\lambda_k) = 2n_{sp}(\lambda_k)\frac{G_k}{G_k - 1}
+\end{equation}
+
+
+\end{frame}
+
+\begin{frame}{Standard confined-doping model}
+	\begin{align} \nonumber
+		\frac{dP_k}{dz} = \underbrace{u_k(\alpha_k + g_k)\frac{\bar{n}_2}{\bar{n}_t}P_k(z)}_{\text{stimulated emission}} - \underbrace{u_k\alpha_kP_k(z)}_{\text{absorption}} + \underbrace{2u_kg_k\frac{\bar{n}_2}{\bar{n}_t}h\nu_k\Delta\nu_k}_{\text{spontaneous emission}}
+	\end{align}
+	\begin{equation} \tag{inversion coefficient}
+		\frac{\bar{n}_2}{\bar{n}_t} = \displaystyle\frac{\displaystyle\sum_k \displaystyle\frac{P_k(z)\alpha_k}{h\nu_k\xi_k}}{1 + \sum_k \displaystyle\frac{P_k(z)(\alpha_k + g_k)}{h\nu_k\xi_k}}
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Semi-analytical model}
+
+\begin{equation} \nonumber
+Q^{out}_k = Q^{in}_k\exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL_{EDF}\Big)
+\end{equation}
+
+\begin{equation} \nonumber
+G_k = \exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL_{EDF}\Big)
+\end{equation}
+
+\begin{equation} \nonumber
+Q^{in}_k = \frac{P_k}{h\nu_k}\qquad Q^{in} = \sum_k Q^{in}_k \qquad Q^{out} = \sum_k Q^{out}_k
+\end{equation}
+
+\begin{equation} \nonumber
+Q^{out} = \sum_kQ^{in}_k\exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL_{EDF}\Big)
+\end{equation}
+
+\end{frame}
+
+%
+\begin{frame}
+\begin{center}
+		\resizebox{\textwidth}{!}{\input{amp_diagram.tex}}
+\end{center}
+
+Ideal gain flattening: $\displaystyle F(\lambda) = \displaystyle\frac{1}{G(\lambda)e^{-\alpha_{\text{SMF}}(\lambda)l}}, \quad \text{only if} \quad G(\lambda) \geq e^{\alpha_{\text{SMF}}(\lambda)l}$
+
+\vspace{0.5cm}
+The equivalent noise is given by
+\begin{equation*}
+	n_{eq, k} = Nn(\lambda_k)F(\lambda_k)e^{-\alpha_{\text{SMF}}(\lambda)l} = N\frac{n(\lambda_k)}{G(\lambda_k)}
+\end{equation*}
+
+It follows that the capacity of $K$ channels spaced by $\Delta f$ is given by
+~
+\begin{align} \nonumber
+C =\sum_{k = 1}^{K} 2\Delta f\log_2\Bigg(1 + \frac{P_kG(\lambda_k)}{Nn(\lambda_k)}\Bigg)
+\end{align}
+\end{frame}
+
+\begin{frame}
+
+From the analytical model: $n(\lambda_k) = 2n_{sp}(\lambda_k)(G(\lambda_k)-1)h\nu_k\Delta f$
+	
+Substituting it in the capacity equation:	
+\begin{align} \nonumber
+	C =\sum_{k = 1}^{K} 2\Delta f\log_2\Bigg(1 + \frac{P_kG(\lambda_k)}{2Nn_{sp}(\lambda_k)(G(\lambda_k)-1)h\nu_k\Delta f}\Bigg)
+\end{align}
+
+Making the approximation: $\displaystyle\frac{G(\lambda_k)}{G(\lambda_k)-1} \approx \frac{e^{\alpha_{\text{SMF}}(\lambda_k)l}}{e^{\alpha_{\text{SMF}}(\lambda_k)l}-1} = a_k$
+	
+\begin{align} \nonumber
+C =\sum_{k = 1}^{K} 2\Delta f\log_2\Bigg(1 + \frac{P_ka_k}{2Nn_{sp}(\lambda_k)h\nu_k\Delta f}\Bigg)
+\end{align}
+
+The capacity depends on excess noise $n_{sp}(\lambda_k)$, but not on gain or ASE
+~
+\begin{align} \tag{theory}
+	n_{sp}(\lambda_k) &= \frac{1}{1 - \displaystyle\frac{g_p\alpha_k}{g_k\alpha_p}} \\
+	&= \frac{\mathrm{NF}(\lambda_k)}{2a_k} \tag{measurement}
+\end{align}
+	
+\end{frame}
+
+\begin{frame}
+
+Only channels satisfying $G(\lambda_k) \geq e^{\alpha_{\text{SMF}}(\lambda_k)l}$ are useful 
+~
+\begin{align} \nonumber
+C =2\Delta f\sum_{k = 1}^{K} \mathds{1}\{G(\lambda_k) \geq e^{\alpha_{\text{SMF}}(\lambda_k)l}\} \log_2\Bigg(1 + \frac{P_ka_k}{2Nn_{sp}(\lambda_k)h\nu_k\Delta f}\Bigg)
+\end{align}
+
+The indicator function $\mathds{1}\{\cdot\}$ is not differentiable. We approximate it by
+\begin{equation*}
+	\mathds{1}\{x \geq 0\} \approx 0.5(\tanh(Dx) + 1),
+\end{equation*}
+where $D>0$ controls the sharpness
+
+%\begin{center}
+%	\resizebox{0.45\textwidth}{!}{\input{indicator_approx.tex}}
+%\end{center}
+
+\end{frame}
+
+
+\begin{frame}
+The optimization problem becomes
+~
+\begin{align} \nonumber
+\max_{P_k, L_{\text{EDF}}}\sum_{k = 1}^{K} &\Big[\tanh\Big(D(G(\lambda_k) - e^{\alpha_{\text{SMF}}(\lambda_k)l})\Big) + 1\Big] \\ \nonumber
+&\cdot\log_2\Bigg(1 + \frac{P_k}{2a_kNn_{sp}(\lambda_k)h\nu_k\Delta f}\Bigg)
+\end{align}
+
+All parameters are constant, except for $G(\lambda_k)$, which varies with the power $P_k$ and the EDF length $L_{\text{EDF}}$
+
+$G(\lambda_k)$ is calculated from the semi-analytical model
+
+\begin{equation} \nonumber
+Q^{in}_k = \frac{P_k}{h\nu_k}, \qquad Q^{out}_k = Q^{in}_k\exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL_{\text{EDF}}\Big)
+\end{equation}
+
+\begin{equation} \nonumber
+G(\lambda_k) = \exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL_{\text{EDF}}\Big)
+\end{equation}
+
+\end{frame}
+
+%%%%%%%%%%%%%% CORNING %%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\begin{center}
+	\resizebox{\textwidth}{!}{\input{amp_diagram.tex}}
+\end{center}
+
+Assumptions and simplifications
+\begin{itemize}
+	\item Assume ideal gain flattening: 
+	\begin{equation*}
+		\displaystyle F(\lambda) = \displaystyle\frac{1}{G(\lambda)e^{-\alpha_{\text{SMF}}(\lambda)l}}, \quad \text{only if} \quad G(\lambda) \geq e^{\alpha_{\text{SMF}}(\lambda)l}
+	\end{equation*}
+	\item Compute gain from semi-analytical model
+	\item Compute ASE power from analytical model 
+	\begin{equation*}
+	n(\lambda_k) = 2n_{sp}(\lambda_k)(G(\lambda_k)-1)h\nu_k\Delta f
+	\end{equation*}
+	excess noise $n_{sp}(\lambda_k)$ can be obtained from theory or noise figure measurements
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+
+After some algebra, we obtain an equation for the capacity
+
+\begin{align} \nonumber
+C =\sum_{k = 1}^{K} 2\Delta f\log_2\Bigg(1 + \frac{P_k}{2a_kNn_{sp}(\lambda_k)h\nu_k\Delta f}\Bigg)
+\end{align}
+
+\end{frame}
+
+\begin{frame}
+
+Only channels satisfying $G(\lambda_k) \geq e^{\alpha_{\text{SMF}}(\lambda_k)l}$ are useful 
+~
+\begin{align} \nonumber
+C =2\Delta f\sum_{k = 1}^{K} \mathds{1}\{G(\lambda_k) \geq e^{\alpha_{\text{SMF}}(\lambda_k)l}\} \log_2\Bigg(1 + \frac{P_k}{2a_kNn_{sp}(\lambda_k)h\nu_k\Delta f}\Bigg)
+\end{align}
+
+The indicator function $\mathds{1}\{\cdot\}$ is not differentiable. We approximate it by
+\begin{equation*}
+\mathds{1}\{x \geq 0\} \approx 0.5(\tanh(Dx) + 1),
+\end{equation*}
+where $D>0$ controls the sharpness
+
+\end{frame}
+
+
+\begin{frame}
+The optimization problem becomes
+~
+\begin{align} \nonumber
+\max_{P_k, L_{\text{EDF}}}\sum_{k = 1}^{K} &\Big[\tanh\Big(D(G(\lambda_k) - e^{\alpha_{\text{SMF}}(\lambda_k)l})\Big) + 1\Big] \\ \nonumber
+&\cdot\log_2\Bigg(1 + \frac{P_k}{2a_kNn_{sp}(\lambda_k)h\nu_k\Delta f}\Bigg)
+\end{align}
+
+\begin{itemize}
+	\item All parameters are constant, except for $G(\lambda_k)$
+	\item $G(\lambda_k)$ is calculated from the semi-analytical model
+\end{itemize}
+
+\begin{equation} \nonumber
+Q^{in}_k = \frac{P_k}{h\nu_k}, \qquad Q^{out}_k = Q^{in}_k\exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL_{\text{EDF}}\Big)
+\end{equation}
+
+\begin{equation} \nonumber
+G(\lambda_k) = \exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL_{\text{EDF}}\Big)
+\end{equation}
+
+\end{frame}
+
+\begin{frame}{Nonlinear noise}
+	\begin{equation*}
+	\mathrm{NL}_n = \sum_{n_1 = 1}^{N}\sum_{n_1 = 1}^N\sum_{q=-1}^{1}P_{n_1}P_{n_2}P_{i+j-n+l}D^{(q)}_{n_1-n, n_2-n}, \quad n = 1, \ldots, N
+	\end{equation*}
+	
+	\begin{align*} \label{eq:Dcoeff-original}\nonumber 
+	D^{(q)}_{n_1-n, n_2-n} &= \gamma^2\frac{16}{27}\iiint_{-\Delta f/2}^{\Delta f/2} \\ \nonumber
+	&\cdot\rho(x + n_1\Delta f, y + n_2\Delta f, z + n\Delta f) \\ \nonumber
+	& \cdot\chi(x + n_1\Delta f, y + n_2\Delta f, z + n\Delta f) \\
+	&\cdot g(x)g(y)g(z)g(x+y-z+q\Delta f)\partial x\partial y\partial z,
+	\end{align*}
+	\begin{align*}
+	\rho(f_1, f_2, f) &= \Bigg|\frac{1 - \exp\Big(-\alpha l + j4\pi^2\beta_2l(f_1-f)(f_2-f)\Big)}{\alpha - j4\pi^2\beta_2(f_1-f)(f_2-f)}\Bigg|^2 \\
+	\chi(f_1, f_2, f) &= \frac{\sin^2(N_s\theta)}{\sin^2(\theta)}, \quad \theta = 2\pi^2(f_1-f)(f_2-f)\beta_2L_s
+	\end{align*}
+	
+	\begin{equation*}
+		\mathrm{NL}_n\Big|_{N_{spans}} = N_{spans}^{1+\epsilon}\cdot\mathrm{NL}_n\Big|_{N_{spans} = 1}
+	\end{equation*}
+	
+\end{frame}
+
+\begin{frame}{Nonlinear noise}
+
+\begin{center}
+	\def\NONLINEAR{1}
+	\resizebox{\textwidth}{!}{\input{amp_diagram.tex}}
+\end{center}
+\begin{equation*}
+\mathrm{NL}_n = \sum_{n_1 = 1}^{N}\sum_{n_1 = 1}^N\sum_{l=-1}^{1}P_{n_1}P_{n_2}P_{i+j-n+l}D_l(n_1, n_2, n), \quad n = 1, \ldots, N
+\end{equation*}
+
+\end{frame}
+
+\begin{frame}
+	\begin{equation*}
+		\max_{P_n, L_{\text{EDF}}} C(P_n, L_{\text{EDF}}; P_p, \{\ldots\})
+	\end{equation*}
+	where
+	
+	\begin{align*} 
+	C(P_n, L_{\text{EDF}}; P_p, \{\ldots\}) = 2\Delta f\sum_{n=1}^N &\mathds{1}\{\mathcal{G}(\lambda_n) \geq \alpha_{\text{SMF}}l\}\log_2\Big(1 + \frac{P_n}{P_{\text{ASE}, n} + \mathrm{NL}_n}\Big) 
+	\end{align*}
+
+	Indicator function is approximated by a differentiable sigmoidal function
+	\begin{equation*}
+	\mathds{1}\{x \geq 0\} \approx 0.5(\tanh(Dx) + 1),
+	\end{equation*}
+	
+	Need to compute amplifier gain $\mathcal{G}(\lambda_n)$, amplifier noise $P_{\text{ASE}, n}$, and nonlinear noise $\mathrm{NL}_n$
+\end{frame}
+
+\begin{frame}
+
+	
+	
+	\begin{equation} \label{eq:semi_analytical_gain}
+	G_k = \exp\Big(\frac{\alpha_k + g_k}{\xi_k}(Q^{in} - Q^{out}) - \alpha_kL_{\text{EDF}}\Big)
+	\end{equation}
+	\begin{equation} \label{eq:out-photon-flux}
+	Q^{out} = \sum_kQ^{in}_k\exp\Big(\frac{\alpha_k + g_k}{\zeta_k}(Q^{in} - Q^{out}) - \alpha_kL_{\text{EDF}}\Big)
+	\end{equation}
+
+	\begin{equation}
+	P_{\text{ASE}, n} = \mathrm{NF}_nh\nu_n\Delta f
+	\end{equation}
+	\begin{equation}
+	\mathrm{NF}_n = 2n_{sp, n}\frac{G_n-1}{G_n}
+	\end{equation}
+\end{frame}
+
+\begin{frame}
+	\begin{columns}
+		\begin{column}{0.33\textwidth}
+			\textbf{Standard confined doping (SCD)}
+			\begin{itemize}
+				\item Boundary value problem 
+				\item Used as reference
+			\end{itemize}
+			\begin{align*} \label{eq:scd} \nonumber
+			\frac{d}{dz}P_k(z) &= u_k(\alpha_k + g^*_k)\frac{\bar{n}_2}{\bar{n}_t}P_k(z) \\
+			&- u_k\alpha_kP_k(z) + 2u_kg^*_k\frac{\bar{n}_2}{\bar{n}_t}h\nu_k\Delta f
+			\end{align*}
+			\begin{equation*}
+			\frac{\bar{n}_2}{\bar{n}_t} = \displaystyle\frac{\displaystyle\sum_k \displaystyle\frac{P_k(z)\alpha_k}{h\nu_k\zeta_k}}{1 + \displaystyle\sum_k \displaystyle\frac{P_k(z)(\alpha_k + g^*_k)}{h\nu_k\zeta_k}}
+			\end{equation*}
+		\end{column}
+			\begin{column}{0.33\textwidth}
+			\textbf{Semi-analytical model}
+			\begin{itemize}
+				\item Particular case of SCD model, where noise is disregarded
+				\item Gain is given by an implicit equation
+				\item Used in optimization to compute gain
+			\end{itemize}
+			\begin{align*} \label{eq:scd} \nonumber
+			\frac{d}{dz}P_k(z) &= u_k(\alpha_k + g^*_k)\frac{\bar{n}_2}{\bar{n}_t}P_k(z) \\
+			&- u_k\alpha_kP_k(z) + 2u_kg^*_k\frac{\bar{n}_2}{\bar{n}_t}h\nu_k\Delta f
+			\end{align*}
+			\begin{equation*}
+			\frac{\bar{n}_2}{\bar{n}_t} = \displaystyle\frac{\displaystyle\sum_k \displaystyle\frac{P_k(z)\alpha_k}{h\nu_k\zeta_k}}{1 + \displaystyle\sum_k \displaystyle\frac{P_k(z)(\alpha_k + g^*_k)}{h\nu_k\zeta_k}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,194 @@
+%%% Externalizing
+\usepgfplotslibrary{external} 
+\ifdefined\EXTERNALIZE
+	\makeatletter	
+	\newcommand*{\overlaynumber}{\number\beamer@slideinframe}
+	\tikzset{
+		beamer externalizing/.style={%
+			execute at end picture={%
+				\tikzifexternalizing{%
+					\ifbeamer@anotherslide
+					\pgfexternalstorecommand{\string\global\string\beamer@anotherslidetrue}%
+					\fi
+				}{}%
+			}%
+		},
+		external/optimize=false
+	}
+	\let\orig@tikzsetnextfilename=\tikzsetnextfilename
+	\renewcommand\tikzsetnextfilename[1]{\orig@tikzsetnextfilename{#1-\overlaynumber}}
+	\makeatother
+	
+	\tikzset{every picture/.style={beamer externalizing}}
+	
+	\tikzexternalize[prefix=external/]
+\fi
+
+%%% Page numbering
+\usepackage{etoolbox} % necessary for excluding beamer-only frames from page numbering
+
+\makeatletter
+\pretocmd{\beamer@@@@frame}{\alt<#1>{}{\beamer@noframenumberingtrue}}{}{}
+\makeatother
+
+\addtobeamertemplate{navigation symbols}{}{%
+	\usebeamerfont{footline}%
+	\usebeamercolor[fg]{footline}%
+	\hspace{1em}%
+	\scriptsize\insertframenumber/\inserttotalframenumber
+}
+%%%
+
+% For circular convolution
+\newcommand\encircle[1]{%
+	\tikz[baseline=(X.base)] 
+	\node (X) [anchor=south, draw, shape=circle, inner sep=0mm, align=center] {\scriptsize\strut #1};}
+
+\definecolor{matlabcomment}{RGB}{34,139,34}
+
+\pgfmathdeclarefunction{gauss}{1}{%
+	\pgfmathparse{1/(sqrt(2*pi))*exp(-((#1)^2)/2)}%
+}
+
+\pgfmathdeclarefunction{sign}{1}{%
+	\pgfmathparse{1*(#1 > 0) - 1*(#1 < 0)}%
+}
+
+\pgfmathdeclarefunction{laplacian}{2}{%
+	\pgfmathparse{1/(#2*2)*exp(-(abs(x-#1))/(#2))}%
+}
+
+\pgfmathdeclarefunction{pretty_func}{1}{%
+	\pgfmathparse{cos(deg(#1/2)) - sin(deg(#1)) + cos(deg(#1/2)-45) - sin(deg(#1/4)-154)}%
+}
+
+\pgfplotsset{
+	dirac/.style={
+		mark=triangle*,
+		mark options={scale=2},
+		ycomb,
+		scatter,
+		visualization depends on={y/abs(y)-1 \as \sign},
+		scatter/@pre marker code/.code={\scope[rotate=90*\sign,yshift=-2pt]}
+	}
+}
+
+\def\thickness{very thick}
+
+\tikzset{
+amark/.style 2 args={
+	decoration={             
+		markings, 
+		mark=at position {0.5} with { 
+			\arrow{stealth},
+			\node[#2] {#1};
+		}
+	}, \thickness,
+	postaction={decorate}
+},
+earlymark/.style 2 args={
+	decoration={             
+		markings, 
+		mark=at position {0.25} with { 
+			\arrow{stealth},
+			\node[#2] {#1};
+		}
+	}, \thickness,
+	postaction={decorate}
+},
+latemark/.style 2 args={
+	decoration={             
+		markings, 
+		mark=at position {0.8} with { 
+			\arrow{stealth},
+			\node[#2] {#1};
+		}
+	}, \thickness,
+	postaction={decorate}
+},
+zpath/.style={
+	decoration={             
+		markings, 
+		mark=at position {0.5} with { 
+			\arrow{stealth},
+			\node[#1] {$z^{-1}$};
+		}
+	}, \thickness,
+	postaction={decorate}
+},
+terminal/.style 2 args={draw,circle,inner sep=2pt,label={#1:#2}},
+}
+
+
+\tikzset{
+	invisible/.style={opacity=0},
+	visible on/.style={alt={#1{}{invisible}}},
+	alt/.code args={<#1>#2#3}{%
+		\alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+	},
+}
+
+\newcommand\PlotSampledSpectrum[4]{%
+	\def\fs{#2}%
+	\def\fmax{#3}%
+	\def\ros{#4}%
+	\input{#1}%
+}
+
+\pgfmathdeclarefunction{invgauss}{2}{%
+	\pgfmathparse{sqrt(-2*ln(#1))*cos(deg(2*pi*#2))}%
+}
+
+\pgfmathdeclarefunction{triang}{2}{%
+	\pgfmathparse{(1/#2)*(#1 + #2)*and(#1 <= 0, #1 >= -#2) + (1/#2)*(-#1 + #2)*and(#1 > 0, #1 <= #2)}%
+}
+
+\pgfmathdeclarefunction{rect}{2}{%
+	\pgfmathparse{and(#1 >= 0, #1 < #2)}%
+}
+
+\pgfmathdeclarefunction{dsinc}{2}{%
+	\pgfmathparse{(and(#1 != 0, 1)*(sin(deg(#1*#2/2))/sin(deg(#1/2))) + and(#1 == 0, 1) * (#2)}%
+}
+
+\tikzset{
+	declare function={
+		sinc(\x) = (and(\x!=0, 1) * (sin(deg(pi*\x))/(pi*\x)) +
+		(and(\x==0, 1) * 1);
+	}
+}
+
+\DeclareMathOperator{\E}{\mathbb{E}} % expectation
+
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+
+\newcommand\SimpleSys[4]{%
+	\def\xin{#2}%
+	\def\Hz{#3}%
+	\def\yout{#4}
+	\input{#1}%
+}
+
+\newcommand\PlotExp[5]{%
+	\def\A{#2}%
+	\def\Legend{#3}%
+	\def\ymin{#4}
+	\def\ymax{#5}
+	\input{#1}%
+}
+
+\newcommand\PlotSinc[5]{%
+	\def\xmin{#2}%
+	\def\xmax{#3}%
+	\def\samples{#4}
+	\def\w{#5}
+	\input{#1}%
+}
+
+% Gaussian characteristic function
+\newcommand\PlotGaussianCF[4]{%
+	\def\sig{#2}%
+	\def\ws{#3}%
+	\def\cap{#4}
+	\input{#1}%
+}
