@@ -1,4 +1,4 @@
-# Components
+# Processing
 
 This folder contains functions for signal processing and impairment mitigation.
 
@@ -9,6 +9,7 @@ Below is a list of classes and functions in this folder. Some examples are shown
 ### Equalization
 
 - [equalize.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/processing/equalize.m): **Design and implementation of linear equalizer**
+
 Designs and implement a linear equalizer. Design can be done adaptively or not.
 
 Function call to design linear equalizer for signal `yt`.
@@ -17,6 +18,7 @@ Function call to design linear equalizer for signal `yt`.
 ```
 
 - [fse_cma.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/processing/fse_cma.m): **Fractionally spaced equalization (FSE) using constant modulus algorithm (CMA)**
+
 Fractionally spaced equalization (FSE) using constant modulus algorithm (CMA). Equalization is done in time domain.
 
 This function can use either four or two filters in the 2 x 2 MIMO equalizer. The two-filter option assumes negligible DGD and is useful to halve the number of operations in DSP.

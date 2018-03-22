@@ -11,6 +11,7 @@ Below is a list of classes and functions in this folder. Some examples are shown
 ### Electronics
 
 - [adc.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/adc.m): **Analog-to-digital converter**
+
 Filter, downsample, and quantize signal `x`
 Function call for converting analog signal `x` to digitized signal `ys` using ADC parameters `ADC` and simulation parameters `sim`. See code for details
 ```
@@ -18,16 +19,20 @@ Function call for converting analog signal `x` to digitized signal `ys` using AD
 ```
 
 - [dac.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/dac.m): **Digital-to-analog converter**
-Quantize, sample and hold with ZOH, and analog filtering
+
+Quantize, sample and hold with ZOH, and analog filtering.
+
 Function call for converting digital signal `x` to analog signal `xa` using DAC parameters `DAC` and simulation parameters `sim`. See code for details
 ```
 [xa, xqzoh, xq] = dac(x, DAC, sim, verbose)
 ```
 
 - [Filter.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/Filter.m): **Filter**
+
 This class can be used as a filter within a loop. It can take one value at each iteration. This is useful for simulating a filter within a loop. When used this way, the filter is implemented as a direct form I. If a vector is passed as a parameter, then the filtering operation will be performed using Matlab's `filter` function (transposed direct form I). If the flag `removeGroupDelay` is `true`, the filter will be implemented in the frequency domain.
 
 Constructor options:
+
 ..* filter specifications are passed: type, order, normalized cutoff frequency, fs (optional)
 ..* filter struct designed with design_filter.m
 ..* filter is already known: passing num, den, fs (optional)
@@ -45,6 +50,7 @@ F = Filter(num, den);
 
 ### Photodiodes
 - [APD.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/APD.m): **Avalanche photodiode**
+
 Class for modeling avalanche photodiode.
 
 Constructor:
@@ -61,6 +67,7 @@ current = Apd.detect(electric_field, sampling_frequency, 'Gaussian', N0);
 In this case the APD method `detect` also adds thermal noise with one-sided PSD `N0`.
 
 - [PIN.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/PIN.m): **Positive-intrinsic-negative photodiode**
+
 This class is a daughter class of class [APD.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/APD.m).
 
 Constructor:
@@ -80,6 +87,7 @@ In this case the PIN method `detect` also adds thermal noise with one-sided PSD 
 ### Fibers and waveguides
 
 - [EDF.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/EDF.m): **Single-mode erbium-doped fiber**
+
 Class for modeling of Erbium-doped fiber physics using analytical, semi-analytical, and numerical methods.
 
 Constructor:
@@ -88,6 +96,7 @@ E = EDF(L, type);
 ```
 
 - [Fiber.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/EDF.m): **Single-mode fiber**
+
 Class for modeling single-mode fiber
 
 Constructor:
@@ -105,6 +114,7 @@ Eout = SMF28.linear_propagation(Ein, frequency_vector, 1550e-9);
 ### Laser, modulators, and amplifiers
 
 - [Laser.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/Laser.m): **Single-mode Laser**
+
 Modeling includes intensity noise, phase noise, chirp, frequency offset, and frequency response for directly modulated lasers
 
 Constructor options:
@@ -122,6 +132,7 @@ Eout = mzm(Ein, Vin, Mod)
 ```
 
 Type of MZ modulators:
+
 ..* __Dual-pol I/Q modulator__ if `Vin` is 2 x N and complex
 ..* __Single-pol I/Q modulator__ if `Vin` is 1 x N and complex
 ..* __Intensity modulator__ if `Vin` is 1 x N and real
@@ -142,6 +153,7 @@ Two operations are possible: `ConstantOutputPower` and `ConstantGain`. If `Opera
 
 ### Misc
 - [attenuator.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/attenuator.m): **Attenuator**
+
 Attenuate signal `x` by `attdB` dB
 
 ```

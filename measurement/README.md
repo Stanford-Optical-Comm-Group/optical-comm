@@ -1,4 +1,4 @@
-# Components
+# Measurement
 
 This folder contains functions and classes use for making measurements. 
 
@@ -11,6 +11,7 @@ Below is a list of classes and functions in this folder. Some examples are shown
 ### Electronics
 
 - [eyediagram.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/measurement/eyediagram.m): **Eye diagram**
+
 Simple eye-diagram plot. Matlab communications toolbox offers more sophisticated options
 
 Function call to plot eye-diagram of signal `x` whose symbol period is `n`
@@ -41,6 +42,7 @@ Osa = OSA(0.4e-9);
 It's usually necessary to use an OSA with resolution higher than 0.1 nm in order to measure all the signal power (e.g., 0.4 nm). The function `estimate_osnr` automatically converts the measurement to the 0.1 nm reference bandwidth (`OSNRdB01nm`).
 
 - [power_meter.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/measurement/power_meter.m): **Power meter**
+
 Simply measures optical power. Signal can be in multiple dimensions (modes or polarizations)
 
 Function call to measure optical power in dBm and Watts of signal `x`
