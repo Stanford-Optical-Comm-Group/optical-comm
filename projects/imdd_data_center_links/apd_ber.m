@@ -20,7 +20,6 @@ Tx.Ptx = dBm2Watt(Tx.PtxdBm(end));
 % Optimize APD gain
 if isfield(sim, 'OptimizeGain') && sim.OptimizeGain
     [Apd.Gain, mpam] = Apd.optGain(mpam, Tx, Fiber, Rx, sim);
-    fprintf('Optimal APD Gain = %.2f (%2.f dB)\n', Apd.Gain, Apd.GaindB);
     % if mpam.level_spacing = 'optimized', then Apd.optGain returns mpam 
     % with optimal level spacing
 elseif mpam.optimize_level_spacing  %% Level Spacing Optimization
