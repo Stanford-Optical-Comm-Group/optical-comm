@@ -10,13 +10,12 @@ This project contains code for analyses and simulations of optical communication
 - [measurement](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/measurement): measurement and characterization.
 - [processing](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/processing): signal processing and impairment mitigation.
 - [projects](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/projects): projects developed using the base code.
-- [propagate](hhttps://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/propagate): TBD.
+- [propagate](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/propagate): TBD.
 - [signal](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/signal): classes on modulation formats.
 - [tools](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/tools): TBD.
 - [utilities](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/utilities): auxiliary functions.
 
 
-# Projects description
 # Projects description
 - [examples](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/projects/examples/): some simple examples on how to run simulations of basic optical communication systems
 

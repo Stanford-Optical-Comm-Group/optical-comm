@@ -9,7 +9,7 @@ classdef Laser
         linewidth % Linewidth (Hz)
         freqOffset = 0;  % frequency offset with respect to wavelength lambda (Hz)
         alpha  = 0; % laser chirp
-        H = @(f) ones(size(f)); % frequency response function handle
+        Filter = Filter() % instance of class Filter corresponding to bandwidth limitation of laser (only used for modulation)
     end
     
     properties(Dependent)
@@ -75,18 +75,24 @@ classdef Laser
             % Inputs: 
             % Pin: optical power
             % fs: sampling rate
-            Pout = Pout + sqrt(self.varRIN(Pout, fs/2)).*randn(size(Pout));
+            if not(isinf(self.RIN)) && not(isempty(self.RIN))
+                Pout = Pout + sqrt(self.varRIN(Pout, fs/2)).*randn(size(Pout));
+            end
         end
         
-        function [Eout, phase_noise] = addPhaseNosie(self, Eout, fs)
+        function [Eout, phase_noise] = addPhaseNoise(self, Eout, fs)
             %% Add phase noise
             % Inputs:
             % - Ein: Electric field
             % - fs: sampling rate
-            initial_phase    = pi*(2*rand(1)-1); % [-pi, pi]
-            dtheta      =       [0 sqrt(self.varPN(fs))*randn(1, length(Eout)-1)]; % i.i.d.Gaussian random variables with zero mean and variance sigma_p^2
-            phase_noise = initial_phase + cumsum(dtheta, 2);
-            Eout = Eout.*exp(1j*phase_noise); % adds phase noise
+            if self.linewidth ~= 0 && not(isempty(self.linewidth))
+                initial_phase    = pi*(2*rand(1)-1); % [-pi, pi]
+                dtheta      =       [0 sqrt(self.varPN(fs))*randn(1, length(Eout)-1)]; % i.i.d.Gaussian random variables with zero mean and variance sigma_p^2
+                phase_noise = initial_phase + cumsum(dtheta, 2);
+                Eout = Eout.*exp(1j*phase_noise); % adds phase noise
+            else
+                phase_noise = 0;
+            end
         end
         
         function Eout = addTransientChirp(self, Ein)
@@ -94,36 +100,32 @@ classdef Laser
             Eout = Ein.*exp(1j*self.alpha/2*log(abs(Ein).^2));
         end
         
-        function Eout = cw(self, sim)
+        function Eout = cw(self, N, fs)
             %% Generates continous wave waveform
             % Inputs:
-            % sim specifies sampling rate (fs), total number of points (N),
-            % and whether intensity noise (RIN) and phase noise (phase_noise)
-            % are included in simulations.
-            % If freqshift ~= 0, then sim must also contain time vector (t)
+            % - N: number of samples
+            % - fs: sampling frequency
+                       
+            Pout = self.PW*ones(1, N);
             
-            Pout = self.PW*ones(size(sim.t));
-            
-            if isfield(sim, 'RIN') && sim.RIN
-                Pout = self.addIntensityNoise(Pout, sim.fs);
-            end
-            
+            Pout = self.addIntensityNoise(Pout, fs);
+                        
             Eout = sqrt(Pout);
             
-            if isfield(sim, 'phase_noise') && sim.phase_noise
-                Eout = self.addPhaseNosie(Eout, sim.fs);
-            end
-            
+            Eout = self.addPhaseNoise(Eout, fs);
+                        
+            dt = 1/fs;
+            t = 0:dt:((N-1)*dt); % time vector
             if length(self.freqOffset) == 1
                 if  self.freqOffset ~= 0
-                	Eout = Eout.*exp(1j*2*pi*self.freqOffset*sim.t);
+                	Eout = Eout.*exp(1j*2*pi*self.freqOffset*t);
                 end
             else
-                Eout = Eout.*exp(1j*2*pi*self.freqOffset.*sim.t);
+                Eout = Eout.*exp(1j*2*pi*self.freqOffset.*t);
             end            
         end    
         
-        function Eout = modulate(self, x, sim)
+        function Eout = modulate(self, x, fs)
             %% Modulate laser output based on driving signal x
             % This generates an electric signal with average power (PdBm)
             % The laser output is filtered by the frequency response H
@@ -134,21 +136,19 @@ classdef Laser
             % Inputs:
             %  - x: driving signal
             %  - sim: simulation struct
-            Pout = self.PW*x/mean(x);
+            Pout = self.PW*x/mean(x); % adjust to laser power
             
-            Pout = real(ifft(fft(Pout).*ifftshift(self.H(sim.f))));
+            Pout = self.Filter.filter(Pout); % filter
                                   
-            if isfield(sim, 'RIN') && sim.RIN
-                Pout = self.addIntensityNoise(Pout, sim.fs);
-            end
-            
-            if self.alpha ~= 0
-                Pout = self.addTransientChirp(Pout);
-            end
+            Pout = self.addIntensityNoise(Pout, fs); % intensity noise
             
             % Clip
             Pout(Pout < 0) = 0;
             Eout = sqrt(Pout);
+                                    
+            Eout = self.addTransientChirp(Eout); % transient chirp
+            
+            Eout = self.addPhaseNoise(Eout, fs); % phase noise
         end          
     end
     

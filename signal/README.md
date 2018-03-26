@@ -1,6 +1,6 @@
 # Signal
 
-This folder contains classes on modulation formats.
+This folder contains classes on modulation formats and signals.
 
 ## Contents 
 
@@ -97,3 +97,12 @@ pulse_shape = select_pulse_shape('rrc', sps, rolloff, span);
 pulse_shape = select_pulse_shape('rc', sps, rolloff, span);
 ```
 `sps` denotes samples per symbol, 0 < rolloff < 1 is the roll-off factor, and `span` is the number of symbols over which the pulse shape spans.
+
+- [Channels.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/signal/Channels.m): **WDM channels**
+
+Channels is a class of WDM channels. It contains information of wavelength, power, and propagation direction of all WDM channels. This class is used in submarine links optimization project. 
+
+Constructor:
+```
+Ch = Channels(wavelength, power, direction)
+```

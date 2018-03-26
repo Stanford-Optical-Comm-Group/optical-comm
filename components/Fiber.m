@@ -55,7 +55,7 @@ classdef Fiber < handle
             if nargin == 3
                 obj.D = D;
             else % assume SMF28 with zero-dispersion wavelength = 1310nm and slope S0 = 0.092         
-                obj.D = @(lamb) fiber.S0/4*(lamb - fiber.lamb0^4./(lamb.^3)); % Dispersion curve
+                obj.D = @(lamb) Fiber.S0/4*(lamb - Fiber.lamb0^4./(lamb.^3)); % Dispersion curve
             end           
         end
         

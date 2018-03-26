@@ -27,12 +27,7 @@ classdef APD
         Niterations = 1e6; % maximum number of iterations in a while loop
         Ptail = 1e-6; % probability of clipped tail
     end
-    
-    properties (Dependent, GetAccess=private, Hidden)
-        a % auxiliary variable G = 1/(1-ab)
-        b % auxiliary variable b = 1/(1-ka)
-    end
-   
+      
     methods
         function this = APD(GaindB, ka, BW, R, Id)
             %% Class constructor
@@ -127,7 +122,7 @@ classdef APD
                 r = N0/self.varShot(P, 1); % Ratio between thermal and shot noise PSD
                 % Note: in calculating shot noise PSD the average power is used
                 Hw = sqrt((1 + r)./(r + abs(self.H(f)).^2));
-                [Hw, groupdelay] = Hgrpdelay(Hw, f);
+                Hw = remove_group_delay(Hw, f);
 
                 if exist('x', 'var')
                     y = ifft(fft(x).*ifftshift(Hw));
@@ -245,11 +240,12 @@ classdef APD
             % Noise std for the level Plevel
             noise_std = @(Plevel) sqrt(varTherm + varRIN(Plevel) + varShot(Plevel));
         end
-        
+    end
+    methods (Access=private)    
         function [Gopt, mpam] = optGain(this, mpam, tx, fiber, rx, sim)
             %% Optimize APD gain: Given target BER finds APD gain that leads to minimum required optical power
-            disp('Optimizing APD gain for sensitivity');
-                   
+            disp('Optimizing APD gain to maximize receiver sensitivity...');
+
             % Find Gapd that minimizes required power to achieve target BER
             if mpam.optimize_level_spacing
                 % Level spacing optimization ensures that target BER is met for a given gain
@@ -271,7 +267,9 @@ classdef APD
             end 
 
             assert(Gopt >= 0, 'apd/optGain: Negative gain found while optimizing APD gain')
-                    
+
+            fprintf('Optimal APD gain is %.2f (%.2f dB)\n', Gopt, 10*log10(Gopt))
+
             % Auxiliary function
             function Gmax = maxGain(apd, minBW)
                 % Max gain allowed during gain optimization
@@ -282,13 +280,13 @@ classdef APD
                 end
             end
         end 
-        
+
         function [Pmean, mpam] = optimize_PAM_levels(this, Gapd, mpam, Tx, Fiber, Rx, sim)
             %% Calculate optimal level spacing for a given APD gain
             % Noise whitening filter depends on optical power, so the levels
             % must be calculated iteratively.
             this.Gain = Gapd;
-                       
+
             %% Iterate until convergence
             Pmean = [0 1];
             tol = 1e-6;
@@ -297,31 +295,29 @@ classdef APD
             Tx.Ptx = 1e-3; % initial power 
             Fiber.att = @(l) 0; % disregard attenuation
             Pdiff = Inf;
-            mpam = mpam.adjust_levels(Tx.Ptx, Tx.Mod.rexdB); % starting level spacing
+            mpam = mpam.adjust_levels(Tx.Ptx, sim.rexdB); % starting level spacing
             while Pdiff > tol && n < maxIterations  
                 [~, noise_std]  = ber_apd_awgn(mpam, Tx, Fiber, this, Rx, sim);
                 % noise_std assumes that levels and decision thresholds are
                 % referred to the receiver
 
-                mpam = mpam.optimize_level_spacing_gauss_approx(sim.BERtarget, Tx.Mod.rexdB, noise_std); % Optimized levels are with respect to transmitter
+                mpam = mpam.optimize_level_spacing_gauss_approx(sim.BERtarget, sim.rexdB, noise_std); % Optimized levels are with respect to transmitter
                 % Levels optimized at the receiver
-                
+
                 % Required power at the APD input
                 Pmean(n+1) = mean(mpam.a)/this.Geff;
                 Tx.Ptx = Pmean(n+1);
                 Pdiff = abs((Pmean(n+1) - Pmean(n))/Pmean(n));
                 n = n+1; 
             end
-            
+
             Pmean = Pmean(end);
-            
+
             if n >= maxIterations
                 warning('apd/optimize_PAM_levels: optimization did not converge')
             end
         end                
-    end
-           
-    methods (Access=private)     
+
         function ber = calc_apd_ber(this, PtxdBm, Gapd, mpam, Tx, Fiber, Rx, sim)
             %% Iterate BER calculation: for given PtxdBm and Gapd calculates BER
             % This function is only called when M-PAM has equally spaced

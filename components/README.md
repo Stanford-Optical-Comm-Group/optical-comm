@@ -10,21 +10,36 @@ Below is a list of classes and functions in this folder. Some examples are shown
 
 ### Electronics
 
-- [adc.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/adc.m): **Analog-to-digital converter**
+- [ADC.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/ADC.m): **Analog-to-digital converter**
 
-Filter, downsample, and quantize signal `x`
-Function call for converting analog signal `x` to digitized signal `ys` using ADC parameters `ADC` and simulation parameters `sim`. See code for details
+Model ADC by anti-aliasing filtering followed by downsampling followed by quantization.
+
+Contructor:
 ```
-[ys, varQ, xa] = adc(x, ADC, sim)
+ADC(T, ENOB, Filter)
+```
+Create ADC with sampling (downsampling) period `T` samples (need not be integer), effective number of bits `ENOB`, and anti-aliasing filer defined by an instance of class [Filter.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/Filter.m).
+
+Example of ADC with sampling period `T = 4`, `ENOB = 5`, and antialiasing filter given by a 5th-order Butterworth filter with cutoff frequency equal to 0.2.
+```
+Adc = ADC(4, 5, Filter('butter', 5, 0.2))
+xd = Adc.convert(xa, frequency_vector)
 ```
 
-- [dac.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/dac.m): **Digital-to-analog converter**
+- [DAC.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/DAC.m): **Digital-to-analog converter**
 
-Quantize, sample and hold with ZOH, and analog filtering.
+Model DAC by quantizer followed by a zero-order holder followed by an analog filter.
 
-Function call for converting digital signal `x` to analog signal `xa` using DAC parameters `DAC` and simulation parameters `sim`. See code for details
+Contructor:
 ```
-[xa, xqzoh, xq] = dac(x, DAC, sim, verbose)
+DAC(Nhold, resolution, Filter)
+```
+Create DAC with upsampling (upsampling) factor `Nhold` samples (must be integer), resolution `resolution` bits, and analog filer defined by an instance of class [Filter.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/Filter.m).
+
+Example of DAC with upsampling period `Nhold = 4`, `resolution = 5`, and analog filter given by a 5th-order Butterworth filter with cutoff frequency equal to 0.2.
+```
+Dac = DAC(4, 5, Filter('butter', 5, 0.2))
+xa = Dac.convert(xd, frequency_vector)
 ```
 
 - [Filter.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/Filter.m): **Filter**
@@ -122,20 +137,35 @@ Constructor options:
 LO = Laser(lambda, PdBm, RIN, linewidth, freqOffset);
 ```
 
-- [mzm.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/mzm.m): **Mach-Zehnder modulator*
+- [MachZehnderMod.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/MachZehnderMod.m): **Mach-Zehnder modulator*
 
 Mach-Zehnder modulator including bandwidth limitation, nonlinear transfer function, and imperfect biasing and clipping.
 
-Function call for driving signal `Vin`, input electric field `Ein`, and modulator parameters `Mod`. Among other things, `Mod` defines the MZM frequency response. If the MZM is traveling wave device its frequency response is limited by loss and velocity mismatch, whereas if the MZM is a lumped device its frequency response is characterized by parasitics. 
+Constructor options:
 ```
-Eout = mzm(Ein, Vin, Mod)
+MZM = MachZehnderMod(Filter)
 ```
+Filter is an instance of class [Filter.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/Filter.m) to model frequency limitation of MZ modulator. 
 
-Type of MZ modulators:
+```
+MZM = MachZehnderMod(ratio, L, f)
+```
+The frequency response of the modulator is limited by frequency mismatch and loss. `ratio` is the ratio of frequency mismatch and `L` is the effective length. `f` is the frequency vector.
 
-..* __Dual-pol I/Q modulator__ if `Vin` is 2 x N and complex
-..* __Single-pol I/Q modulator__ if `Vin` is 1 x N and complex
-..* __Intensity modulator__ if `Vin` is 1 x N and real
+Both constructors assume that `Vpi = 1` and `Vbias = 0`.
+
+Regardless of the constructor the main method is the same:
+
+```
+Eout = MZM.modulate(Ein, Vin, f)
+```
+Function call for driving signal `Vin`, input electric field `Ein`, and frequency vector `f`. 
+
+The type of MZ modulator depends on `Vin`:
+
+	* __Dual-pol I/Q modulator__ if `Vin` is 2 x N and complex
+	* __Single-pol I/Q modulator__ if `Vin` is 1 x N and complex
+	* __Intensity modulator__ if `Vin` is 1 x N and real
 
 - [OpticalAmplifier.m](https://github.com/Stanford-Optical-Comm-Group/optical-comm/blob/master/components/OpticalAmplifier.m): **Single-mode Optical Amplifier**
 
