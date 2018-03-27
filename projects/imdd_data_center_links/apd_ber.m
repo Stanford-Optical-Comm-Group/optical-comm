@@ -1,6 +1,7 @@
 function [ber, mpam, Apd] = apd_ber(mpam, Tx, Fiber, Apd, Rx, sim)
 %% Calculate BER of unamplified IM-DD system with APD detector for each transmitted power value in Tx.PtxdBm
-% BER is calculated via montecarlo simulation, analytically, AWGN channel, 
+% BER is calculated via montecarlo simulation, analytically using enumeration,
+% and analytically assuming AWGN channel approximation, 
 % AWGN channel including noise enhancement penalty.
 
 % If equalizer is not defined assume no equalization

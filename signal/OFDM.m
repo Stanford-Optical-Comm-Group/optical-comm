@@ -360,7 +360,7 @@ classdef OFDM < handle
                 if M == 0
                     X = zeros(size(x));
                 else
-                    X = qamdemod(x, M, 0, 'gray');
+                    X = qamdemod(x, M, 'gray');
                 end
             end
         end
@@ -377,7 +377,7 @@ classdef OFDM < handle
                 if M == 0
                     X = zeros(size(data));
                 else
-                    X = qammod(data, M, 0, 'gray');
+                    X = qammod(data, M, 'gray');
                 end
             end
         end
@@ -393,7 +393,7 @@ classdef OFDM < handle
                 if M == 0
                     X = 0;
                 else
-                    X = qammod(qamdemod(x, M, 0, 'gray'), M, 0, 'gray');
+                    X = qammod(qamdemod(x, M, 'gray'), M, 'gray');
                 end
             end
         end
@@ -453,7 +453,7 @@ classdef OFDM < handle
             
             % Calculate unbiased SNR estimate
             SNRn.measured = 10*log10(Pnmeasured./Pnoise - 1); 
-            SNRn.estimated = 10*log10(Pnest./noiseVar - 1); 
+            SNRn.estimated = 10*log10(Pnest./noiseVar); 
             
             ber_est = this.calc_ber(SNRn.estimated);
             
@@ -663,7 +663,7 @@ classdef OFDM < handle
                 if this.CSn(k) == 0
                     continue
                 else
-                    Pqam(k) = mean(abs(qammod(0:this.CSn(k)-1, this.CSn(k), 0, 'gray')).^2);
+                    Pqam(k) = mean(abs(qammod(0:this.CSn(k)-1, this.CSn(k), 'gray')).^2);
                 end
             end
         end  

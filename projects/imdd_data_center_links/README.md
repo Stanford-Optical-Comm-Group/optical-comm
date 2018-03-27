@@ -7,9 +7,9 @@ This project also includes codes for analysis of receiver sensitivity improvemen
 
 ## Folder description
 
-- [data_center_imdd/](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/projects/data_center_imdd): analysis and simulations of intensity-modulated direct-detected (IM-DD) optical systems using avalanche photodiodes  
-  - [data_center_imdd/doc](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/projects/data_center_imdd/doc): documentation. Latex file containing some of the theoretical derivations and analyses
-  - [data_center_imdd/f](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/projects/data_center_imdd/f): auxiliary functions used in apd/
+- [imdd_data_center_links/](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/projects/imdd_data_center_links): analysis and simulations of intensity-modulated direct-detected (IM-DD) optical systems using avalanche photodiodes  
+  - [imdd_data_center_links/doc](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/projects/imdd_data_center_links/doc): documentation. Latex file containing some of the theoretical derivations and analyses
+  - [imdd_data_center_links/f](https://github.com/Stanford-Optical-Comm-Group/optical-comm/tree/master/projects/imdd_data_center_links/f): auxiliary functions used in apd/
 
   __Publications__
 

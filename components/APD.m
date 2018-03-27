@@ -240,8 +240,7 @@ classdef APD
             % Noise std for the level Plevel
             noise_std = @(Plevel) sqrt(varTherm + varRIN(Plevel) + varShot(Plevel));
         end
-    end
-    methods (Access=private)    
+        
         function [Gopt, mpam] = optGain(this, mpam, tx, fiber, rx, sim)
             %% Optimize APD gain: Given target BER finds APD gain that leads to minimum required optical power
             disp('Optimizing APD gain to maximize receiver sensitivity...');
@@ -280,7 +279,7 @@ classdef APD
                 end
             end
         end 
-
+    
         function [Pmean, mpam] = optimize_PAM_levels(this, Gapd, mpam, Tx, Fiber, Rx, sim)
             %% Calculate optimal level spacing for a given APD gain
             % Noise whitening filter depends on optical power, so the levels
@@ -316,8 +315,10 @@ classdef APD
             if n >= maxIterations
                 warning('apd/optimize_PAM_levels: optimization did not converge')
             end
-        end                
+        end   
+    end
 
+    methods (Access=private)
         function ber = calc_apd_ber(this, PtxdBm, Gapd, mpam, Tx, Fiber, Rx, sim)
             %% Iterate BER calculation: for given PtxdBm and Gapd calculates BER
             % This function is only called when M-PAM has equally spaced

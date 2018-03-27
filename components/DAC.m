@@ -26,8 +26,8 @@ classdef DAC
             %% Quantization and clipping
             if not(isinf(self.resolution))
                 if not(isempty(self.excursion))
-                    xmax = DAC.excursion(2);
-                    xmin = DAC.excursion(1);
+                    xmax = self.excursion(2);
+                    xmin = self.excursion(1);
                 else
                     xmax = max(x);
                     xmin = min(x);
@@ -74,7 +74,7 @@ classdef DAC
 
             % Filtering
             xa = real(ifft(fft(xqzoh).*Hdac.*Hshift)); % filter
-        end        
+        end 
     end
 end
     

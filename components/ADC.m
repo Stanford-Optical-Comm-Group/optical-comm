@@ -74,8 +74,8 @@ classdef ADC
             %% Quantization and clipping
             if not(isinf(self.ENOB))
                 if not(isempty(self.excursion))
-                    xmax = ADC.excursion(2);
-                    xmin = ADC.excursion(1);
+                    xmax = self.excursion(2);
+                    xmin = self.excursion(1);
                 else
                     xmax = max(xs);
                     xmin = min(xs);

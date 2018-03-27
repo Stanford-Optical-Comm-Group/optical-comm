@@ -27,7 +27,7 @@ classdef MachZehnderMod
             % to the bandwidth limitation of the MZ modulator
             
             if isa(varargin{1}, 'Filter') % 
-                obj.Filter = Filter;
+                obj.Filter = varargin{1};
             else
                 obj.ratio = varargin{1};
                 obj.L = varargin{2}; % 

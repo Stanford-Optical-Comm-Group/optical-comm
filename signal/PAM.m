@@ -193,41 +193,6 @@ classdef PAM
             
             self.b = thresh;
         end
-        
-        function self = mzm_predistortion(self, Vswing, Vbias, verbose)
-            %% Predistort levels to compensate for MZM nonlinear response in IM-DD
-            predist = @(p) 2/pi*asin(sqrt(p));
-            dist = @(v) sin(pi/2*v)^2;
-            
-            Vmin = Vbias - Vswing/2;
-            Vmax = Vbias + Vswing/2;
-            
-            Pmax = dist(Vmax);
-            Pmin = dist(Vmin);
-            DP = (Pmax-Pmin)/(self.M-1);
-            Pk = Pmin:DP:Pmax;
-            
-            assert(all(Pk >= 0), 'mpam/mzm_predist: Pswing too high. Pswing must be such that all levels are non-negative')
-            
-            % Predistortion
-            Vk = predist(Pk);
-            
-            % Set
-            self = self.set_levels(Vk, self.b);
-            % Note: Decision thresholds are not predistorted, since the predistortion is only
-            % used for generatign the levels at the transmitter.
-            
-            if exist('verbose', 'var') && verbose
-                figure(233), clf, hold on, box on
-                t = linspace(0, 1);
-                plot(t, sin(pi/2*t).^2, 'k');
-                plot((self.a*[1 1]).', [zeros(1, self.M); sin(pi/2*self.a.').^2], 'k');
-                plot([zeros(1, self.M); self.a.'], (Pk*[1 1]).', 'k')
-                xlabel('Driving signal')
-                ylabel('Resulting power levels')
-                axis([0 1 0 1])
-            end        
-        end
     end
     
     methods
